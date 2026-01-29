@@ -17,3 +17,20 @@ SQLALCHEMY_DATABASE_URI = os.getenv(
 SQLALCHEMY_TRACK_MODIFICATION = False
 
 #JWT configuration
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY",
+    "eco-learn-jwt-secret-key"
+)
+JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=6)
+
+#file upload configuration
+UPLOAD_FOLDER = os.getenv(
+    "UPLOAD_FOLDER",
+    "uploads/challenge_proofs"
+)
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024 #5 MB limit 
+ALLOWED_EXTENSIONS = {"png","jpg","jpeg"}
+
+#Apllication metadata
+APP_NAME = "EcoLearn"
+APP_VERSION = "1.0.0"
