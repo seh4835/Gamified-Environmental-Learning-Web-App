@@ -42,3 +42,23 @@ app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 db.init_app(app)
 jwt.init_app(app)
+
+ # Registering Bliwprints
+
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(users_bp, url_prefix="/api/users")
+app.register_blueprint(modules_bp, url_prefix="/api/modules")
+app.register_blueprint(quizzes_bp, url_prefix="/api/quizzes")
+app.register_blueprint(challenges_bp, url_prefix="/api/challenges")
+app.register_blueprint(leaderboard_bp, url_prefix="/api/leaderboard")
+app.register_blueprint(admin_bp, url_prefix="/api/admin")
+
+# Health Check Endpoint
+
+@app.route("/api/health", methods=["GET"])
+def health_check():
+        """
+        Simple endpoint to verify that the backend is running.
+        Useful for debugging, deployment checks, and monitoring.
+        """
+        return jsonify({"status": "running","service": "EcoLearn Backend","version": "1.0.0" }), 200
