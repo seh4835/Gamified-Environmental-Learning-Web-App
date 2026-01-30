@@ -23,3 +23,34 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User{self.email}>"
+
+#Learning Module Model
+class LearningModule(db.Model):
+    __tablename__="learning modules"
+
+    id=db.Column(db.Integer,primary_key=True)
+    title=db.Column(db.String(150), nullable=False)
+    description=db.Column(db.Text, nullable=False)
+    difficulty=db.Column(db.String(50), default="beginner")
+    points=db.Column(db.Integer, default=10)
+
+    quizzes=db.relationship("QuizQuestion", backref="module", lazy=True)
+
+    def __repr__(self):
+        return f"<Module{self.title}>"
+    
+#Quiz Question Model
+class QuizQustion(db.Model):
+    __tablename__="quiz_questions"
+    id=db.Column(db.Integer,primary_key=True)
+    module_id=db.Column(db.Integer, db.ForeignKey("learning_modules.id"), nullable=False)
+
+    question=db.Column(db.Text, primary_key=True)
+    option_a=db.Column(db.String(255), nullable=False)
+    option_b=db.Column(db.String(255), nullable=False)
+    option_c=db.Column(db.String(255), nullable=False)
+    option_d=db.Column(db.String(255), nullable=False)
+    correct_option=db.Column(db.String(1), nullable=False)
+
+    def __repr__(self):
+        return f"<QuizQuestion{self.id}>"
