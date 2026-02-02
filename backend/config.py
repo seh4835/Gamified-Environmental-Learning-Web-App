@@ -34,3 +34,20 @@ ALLOWED_EXTENSIONS = {"png","jpg","jpeg"}
 #Apllication metadata
 APP_NAME = "EcoLearn"
 APP_VERSION = "1.0.0"
+
+#class development Config(BaseConfig):
+DEBUG = True
+ENV = "development"
+
+#class productionConfig(BaseConfig):
+DEBUG = False
+ENV = "production"
+
+#Configuration selector
+config_by_name={
+    "development":
+    DevelopmentConfig,
+    "production":ProductionConfig,
+    "default":DevelopmentConfig,
+}
+
