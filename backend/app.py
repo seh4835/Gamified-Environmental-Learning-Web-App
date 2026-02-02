@@ -7,7 +7,7 @@ registering all feature modules
 running the application
 """
 from flask import Flask, jsonify
-from flask cors import CORS
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
