@@ -7,7 +7,7 @@ registering all feature modules
 running the application
 """
 from flask import Flask, jsonify
-from flask_cors import CORS
+from flask cors import CORS
 from dotenv import load_dotenv
 import os
 
@@ -62,3 +62,24 @@ def health_check():
         Useful for debugging, deployment checks, and monitoring.
         """
         return jsonify({"status": "running","service": "EcoLearn Backend","version": "1.0.0" }), 200
+ # Global Error Handlers
+
+@app.errorhandler(404)
+def not_found(error):
+        return jsonify({"error": "Endpoint not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+        return jsonify({"error": "Internal server error"}), 500
+
+        return app
+
+# Application Bootstrap
+
+if __name__ == "__main__":
+    app = create_app()
+
+    with app.app_context():
+        db.create_all()  # Create tables if they do not exist
+
+    app.run(host="0.0.0.0", port=5000, debug=True)
