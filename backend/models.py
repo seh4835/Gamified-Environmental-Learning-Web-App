@@ -54,3 +54,76 @@ class QuizQustion(db.Model):
 
     def __repr__(self):
         return f"<QuizQuestion{self.id}>"
+
+#Quiz Attempt Model
+class QuzAttempt(db.Model):
+    __tablename__="quiz_attempts"
+    id=db.Column(db.Integer,primary_key=True)
+    user_id= db.Column(db.Integer,db.ForeignKey("users.id"), nullable=False)
+    module_id=db.Column(db.Integer,db.ForeignKey("learning_modules.id"), nullable="False")
+
+    score=db.Column(db.Integer, nullable=False)
+    attempted_at= db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
+    def __repr__(self):
+        return f"<QuizAttempt User:{self.user_id} Module:{self.module_id}>"
+    
+#Eco Challenge Model
+class EcoChallenge(db.Model):
+    __tablename__="eco_challenges"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    instructions = db.Column(db.Text, nullable=False)
+
+    points = db.Column(db.Integer, default=20)
+    active = db.Column(db.Boolean, default=True)
+
+    submissions = db.relationship("ChallengeSubmission", backref="challenge", lazy=True)
+
+    def __repr__(self):
+        return f"<EcoChallenge {self.title}>"
+    
+#Challenge Submission Model
+class ChallengeSubmission(db.Model):
+    __tablename__ = "challenge_submissions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey("eco_challenges.id"), nullable=False)
+
+    proof_url = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), default="pending")  # pending / approved / rejected
+
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f"<Submission User:{self.user_id} Challenge:{self.challenge_id}>"
+    
+#Badge Model
+class Badge(db.Model):
+    __tablename__ = "badges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    required_points = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<Badge {self.name}>"
+    
+#User Badge Mapping Model
+class UserBadge(db.Model):
+    __tablename__ = "user_badges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"), nullable=False)
+
+    earned_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    badge = db.relationship("Badge")
+
+    def __repr__(self):
+        return f"<UserBadge User:{self.user_id} Badge:{self.badge_id}>"
