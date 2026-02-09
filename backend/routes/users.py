@@ -50,3 +50,19 @@ def get_dashboard_summary():
         user_id=user.id,
         status="approved"
     ).count()
+
+    badge_data = []
+    for badge in badges:
+        badge_data.append({
+            "id":badge.id,
+            "name":badge.name,
+            "description":badge.description,
+            "required_points":badge.required_points
+        })
+
+        return jsonify({
+            "eco_points":user.eco_points,
+            "badges":badge_data,
+            "quiz_attempts":quiz_attempts_count,
+            "challenges_completed":challenges_completed_count
+        }), 200
