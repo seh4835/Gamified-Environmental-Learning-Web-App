@@ -39,7 +39,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "eco-learn-jwt-secret")
 app.config["UPLOAD_FOLDER"] = "uploads/challenge_proofs"
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
-    # Initialize Extensions
+ # Initialize Extensions
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 db.init_app(app)
 jwt.init_app(app)

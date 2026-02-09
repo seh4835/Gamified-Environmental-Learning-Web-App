@@ -32,21 +32,19 @@ def submit_quiz():
 
     user_id = get_jwt_identity()
     data = request.get_json()
-# Basic Valdation
-
-if not data or "module_id" not in data or "answers" not in data:
-    return jsonify({"error": "module_id and answers are required"}), 400
-
+    # Basic Valdation
+    if not data or "module_id" not in data or "answers" not in data:
+        return jsonify({"error": "module_id and answers are required"}), 400
+    
     module = LearningModule.query.get(data["module_id"])
-if not module:
-    return jsonify({"error": "Learning module not found"}), 404
-
+    if not module:
+        return jsonify({"error": "Learning module not found"}), 404
+    
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
-
+    
     answers = data["answers"]
-
     # Fetch Quiz Questions
 
     questions = QuizQuestion.query.filter_by(module_id=module.id).all()
