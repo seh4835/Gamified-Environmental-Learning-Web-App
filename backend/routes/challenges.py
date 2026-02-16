@@ -95,3 +95,19 @@ def submit_challenge():
         proof_file.save(file_path)
 
         proof_url = file_path
+     # Save Submission
+
+    submission = ChallengeSubmission(
+        user_id=user.id,
+        challenge_id=challenge.id,
+        proof_url=proof_url,
+        status="pending",
+        submitted_at=datetime.utcnow()
+    )
+
+    db.session.add(submission)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Challenge submitted successfully. Awaiting approval."
+    }), 201
