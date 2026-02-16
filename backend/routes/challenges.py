@@ -111,3 +111,27 @@ def submit_challenge():
     return jsonify({
         "message": "Challenge submitted successfully. Awaiting approval."
     }), 201
+# Get My Challenge Submissions
+
+@challenges_bp.route("/my-submissions", methods=["GET"])
+@jwt_required()
+def get_my_submissions():
+    """
+    Returns the authenticated user's challenge submissions.
+    """
+
+    user_id = get_jwt_identity()
+
+    submissions = ChallengeSubmission.query.filter_by(user_id=user_id).all()
+
+    result = []
+    for sub in submissions:
+        result.append({
+            "id": sub.id,
+            "challenge_id": sub.challenge_id,
+            "proof_url": sub.proof_url,
+            "status": sub.status,
+            "submitted_at": sub.submitted_at.isoformat()
+        })
+
+    return jsonify(result), 200
