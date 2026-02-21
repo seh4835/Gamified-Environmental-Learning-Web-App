@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="EcoLearn AR Scan & Learn – Point your camera at everyday objects to learn sustainable practices."
+    />
+    <title>EcoLearn AR | Scan & Learn</title>
+
+    <!-- A-Frame + AR.js -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.1/aframe/build/aframe-ar.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: #000;
+      }
+
+      .overlay {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #ffffff;
+        text-align: center;
+        font-size: 14px;
+        z-index: 10;
+      }
+
+       .topbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        padding: 10px 16px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #ffffff;
+        text-align: center;
+        font-weight: bold;
+        z-index: 10;
+      }
+
+      .hint {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Top Instruction Bar -->
+    <div class="topbar">
+      EcoLearn AR – Scan & Learn
+      <div class="hint">Point your camera at the marker to learn eco tips</div>
+    </div>
+
+    <!-- A-Frame AR Scene -->
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      renderer="logarithmicDepthBuffer: true;"
+    >
+      <!-- Marker (Hiro marker by default) -->
+      <a-marker preset="hiro">
+        <!-- Floating Eco Tip -->
+        <a-plane
+          position="0 0.5 0"
+          rotation="-90 0 0"
+          width="1.8"
+          height="1"
+          color="#0f766e"
+          material="opacity: 0.85"
+        ></a-plane>
+
+        <a-text
+          value="Save Water\nTurn off taps when not in use."
+          position="0 1 0"
+          rotation="-90 0 0"
+          align="center"
+          color="#ffffff"
+          width="2"
+        ></a-text>
+
+        <a-text
+          value="Tip: Small actions daily = Big impact"
+          position="0 0.7 0"
+          rotation="-90 0 0"
+          align="center"
+          color="#d1fae5"
+          width="2"
+        ></a-text>
+      </a-marker>
+
+      <!-- Camera -->
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Bottom Overlay -->
+    <div class="overlay">
+      Example: Point at a tree / dustbin marker to see sustainability tips.
+    </div>
+  </body>
+</html>
