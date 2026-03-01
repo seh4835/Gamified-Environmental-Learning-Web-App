@@ -40,7 +40,7 @@ class LearningModule(db.Model):
         return f"<Module{self.title}>"
     
 #Quiz Question Model
-class QuizQustion(db.Model):
+class QuizQuestion(db.Model):
     __tablename__="quiz_questions"
     id=db.Column(db.Integer,primary_key=True)
     module_id=db.Column(db.Integer, db.ForeignKey("learning_modules.id"), nullable=False)
@@ -56,7 +56,7 @@ class QuizQustion(db.Model):
         return f"<QuizQuestion{self.id}>"
 
 #Quiz Attempt Model
-class QuzAttempt(db.Model):
+class QuizAttempt(db.Model):
     __tablename__="quiz_attempts"
     id=db.Column(db.Integer,primary_key=True)
     user_id= db.Column(db.Integer,db.ForeignKey("users.id"), nullable=False)
