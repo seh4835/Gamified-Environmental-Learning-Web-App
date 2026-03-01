@@ -13,12 +13,12 @@ import os
 
 from extensions import db, jwt
 from routes.auth import auth_bp
-from routes.users import user_bp
-from routes.modules import module_bp
-from routes.quizzes import quiz_bp
-from routes.challenges import challenge_bp
-from routes.leaderboards import leaderboard_bp
-from route.admin import admin_bp
+from routes.users import users_bp
+from routes.modules import modules_bp
+from routes.quizzes import quizzes_bp
+from routes.challenges import challenges_bp
+from routes.leaderboard import leaderboard_bp
+from routes.admin import admin_bp
 
 def create_app():
     """
