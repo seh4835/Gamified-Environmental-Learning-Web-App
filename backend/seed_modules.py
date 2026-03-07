@@ -2,6 +2,9 @@ from app import app
 from extensions import db
 from models import LearningModule
 
+with app.app_context():
+    db.create_all()
+    
 modules_data = [
     {
         "title": "Climate Change & Global Warming",

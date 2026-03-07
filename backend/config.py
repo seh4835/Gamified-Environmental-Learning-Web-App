@@ -2,52 +2,58 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-#load variables from .env file (only once , globally)
+# load variables from .env file (only once, globally)
 load_dotenv()
 
+
 class BaseConfig:
-#core flask configuration
-SECRET_KEY = os.getenv("SECRET_KEY","eco-learn-secret-key")
+    # core flask configuration
+    SECRET_KEY = os.getenv("SECRET_KEY", "eco-learn-secret-key")
 
-#database configuration
-SQLALCHEMY_DATABASE_URI = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///ecolearn.db"
-)
-SQLALCHEMY_TRACK_MODIFICATION = False
+    # database configuration (Supabase PostgreSQL)
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "https://zrggqljxfrnhlnlqjcgf.supabase.co"
+    )
 
-#JWT configuration
-JWT_SECRET_KEY = os.getenv(
-    "JWT_SECRET_KEY",
-    "eco-learn-jwt-secret-key"
-)
-JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=6)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-#file upload configuration
-UPLOAD_FOLDER = os.getenv(
-    "UPLOAD_FOLDER",
-    "uploads/challenge_proofs"
-)
-MAX_CONTENT_LENGTH = 5 * 1024 * 1024 #5 MB limit 
-ALLOWED_EXTENSIONS = {"png","jpg","jpeg"}
+    # JWT configuration
+    JWT_SECRET_KEY = os.getenv(
+        "JWT_SECRET_KEY",
+        "eco-learn-jwt-secret-key"
+    )
 
-#Apllication metadata
-APP_NAME = "EcoLearn"
-APP_VERSION = "1.0.0"
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=6)
 
-#class development Config(BaseConfig):
-DEBUG = True
-ENV = "development"
+    # file upload configuration
+    UPLOAD_FOLDER = os.getenv(
+        "UPLOAD_FOLDER",
+        "uploads/challenge_proofs"
+    )
 
-#class productionConfig(BaseConfig):
-DEBUG = False
-ENV = "production"
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB limit
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
-#Configuration selector
-config_by_name={
-    "development":
-    DevelopmentConfig,
-    "production":ProductionConfig,
-    "default":DevelopmentConfig,
+    # application metadata
+    APP_NAME = "EcoLearn"
+    APP_VERSION = "1.0.0"
+
+
+class DevelopmentConfig(BaseConfig):
+    DEBUG = True
+    ENV = "development"
+
+
+class ProductionConfig(BaseConfig):
+    DEBUG = False
+    ENV = "production"
+
+
+# Configuration selector
+config_by_name = {
+    "development": DevelopmentConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
 }
 
