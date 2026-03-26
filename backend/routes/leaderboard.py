@@ -36,7 +36,7 @@ def global_leaderboard():
     return jsonify(result), 200
 
 #School-wise Leaderboard
-@leaderboard_bp.route("/school/<string:institution", methods=["GET"])
+@leaderboard_bp.route("/school/<string:institution>", methods=["GET"])
 @jwt_required()
 
 def school_leaderboard(institution):
