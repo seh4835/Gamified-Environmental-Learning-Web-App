@@ -28,9 +28,7 @@ def get_all_modules():
     return jsonify(result), 200
 
 
-# -------------------------------------------
 # GET SINGLE MODULE + QUIZZES
-# -------------------------------------------
 @modules_bp.route("/<int:module_id>", methods=["GET"])
 @jwt_required()
 def get_module_detail(module_id):
