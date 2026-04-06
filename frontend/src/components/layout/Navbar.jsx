@@ -1,10 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import logo from "../assets/logo.png"; // optional: replace with your logo path
+import { useAuth } from "../../context/AuthContext";
+// import logo from "../../assets/logo.png"; // optional: replace with your logo path
 
 export default function Navbar() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
 
   const baseLinkClasses =
     "px-3 py-2 rounded-md text-sm font-medium transition-colors";
@@ -20,13 +19,13 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2">
               {/* Logo (optional) */}
-              <img
+              {/* <img
                 src={logo}
                 alt="EcoLearn Logo"
                 className="h-8 w-8 object-contain"
-              />
+              /> */}
               <span className="text-lg font-semibold text-green-700">
-                EcoLearn
+                🌿 EcoLearn
               </span>
             </Link>
           </div>

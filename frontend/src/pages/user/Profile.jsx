@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import Loader from "../components/Loader";
-import api from "../services/api";
+import Loader from "../../components/ui/Loader";
+import api from "../../services/api";
 
 export default function Profile() {
   const [user, setUser] = useState(null);

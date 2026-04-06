@@ -1,6 +1,6 @@
-import leafIcon from "../assets/icons/leaf.svg";
-import trophyIcon from "../assets/icons/trophy.svg";
-import badgeIcon from "../assets/icons/badge.svg";
+// import leafIcon from "../../assets/icons/leaf.svg";
+// import trophyIcon from "../../assets/icons/trophy.svg";
+// import badgeIcon from "../../assets/icons/badge.svg";
 
 /**
  * Badge Component
@@ -17,14 +17,14 @@ import badgeIcon from "../assets/icons/badge.svg";
  * - earned?: boolean
  */
 export default function Badge({ badge, earned = true }) {
-  // Map badge types to icons (can be extended later)
+  // Map badge types to emoji icons
   const iconMap = {
-    "Green Beginner": leafIcon,
-    "Eco Warrior": trophyIcon,
-    "Sustainability Champion": badgeIcon,
+    "Green Beginner": "🌱",
+    "Eco Warrior": "🏆",
+    "Sustainability Champion": "🌍",
   };
 
-  const iconSrc = iconMap[badge.name] || badgeIcon;
+  const iconSrc = iconMap[badge.name] || "⭐";
 
   return (
     <div
@@ -38,11 +38,9 @@ export default function Badge({ badge, earned = true }) {
     >
       {/* Icon */}
       <div className="flex-shrink-0">
-        <img
-          src={iconSrc}
-          alt={badge.name}
-          className="h-10 w-10 object-contain"
-        />
+        <div className="h-10 w-10 flex items-center justify-center text-2xl">
+          {iconSrc}
+        </div>
       </div>
 
       {/* Content */}

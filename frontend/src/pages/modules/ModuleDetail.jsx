@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Loader from "../components/Loader";
-import QuizCard from "../components/QuizCard";
-import api from "../services/api";
+import Loader from "../../components/ui/Loader";
+import QuizCard from "../../components/features/quiz/QuizCard";
+import api from "../../services/api";
 
 export default function ModuleDetail() {
   const { id } = useParams();

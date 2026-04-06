@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Loader from "../components/Loader";
-import api from "../services/api";
+import Loader from "../../components/ui/Loader";
+import api from "../../services/api";
 
 export default function Modules() {
   const [modules, setModules] = useState([]);

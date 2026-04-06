@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Loader from "../components/Loader";
+import Loader from "../components/ui/Loader";
 
 export default function Challenges() {
   const [activeChallenge, setActiveChallenge] = useState(null);

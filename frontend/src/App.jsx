@@ -1,12 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 /*
 |--------------------------------------------------------------------------
 | GLOBAL COMPONENTS
 |--------------------------------------------------------------------------
 */
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 
 /*
 |--------------------------------------------------------------------------
@@ -14,16 +14,16 @@ import Footer from "./components/Footer";
 |--------------------------------------------------------------------------
 */
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Modules from "./pages/Modules";
-import ModuleDetail from "./pages/ModuleDetail";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Dashboard from "./pages/user/Dashboard";
+import Modules from "./pages/modules/Modules";
+import ModuleDetail from "./pages/modules/ModuleDetail";
 import Challenges from "./pages/Challenges";
-import Submissions from "./pages/Submissions";
+import Submissions from "./pages/admin/Submissions";
 import Leaderboard from "./pages/Leaderboard";
-import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
+import Profile from "./pages/user/Profile";
+import Admin from "./pages/admin/Admin";
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +40,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
-
+    <>
       {/* 🌿 Global Layout */}
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-green-50 to-white">
 
@@ -150,7 +149,7 @@ function App() {
         <Footer />
 
       </div>
-    </Router>
+    </>
   );
 }
 

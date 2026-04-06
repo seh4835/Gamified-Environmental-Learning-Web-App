@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import heroIllustration from "../assets/hero-illustration.svg";
-import leafIcon from "../assets/icons/leaf.svg";
-import recycleIcon from "../assets/icons/recycle.svg";
-import trophyIcon from "../assets/icons/trophy.svg";
+// import heroIllustration from "../assets/hero-illustration.svg";
+// import leafIcon from "../assets/icons/leaf.svg";
+// import recycleIcon from "../assets/icons/recycle.svg";
+// import trophyIcon from "../assets/icons/trophy.svg";
 
 export default function Home() {
   return (

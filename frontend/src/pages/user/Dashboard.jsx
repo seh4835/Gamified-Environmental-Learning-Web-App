@@ -1,12 +1,12 @@
-import { useEffect, useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import Loader from "../components/Loader";
-import Badge from "../components/Badge";
-import ProgressBar from "../components/ProgressBar";
-import api from "../services/api";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import Loader from "../../components/ui/Loader";
+import Badge from "../../components/ui/Badge";
+import ProgressBar from "../../components/features/quiz/ProgressBar";
+import api from "../../services/api";
 
 export default function Dashboard() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
