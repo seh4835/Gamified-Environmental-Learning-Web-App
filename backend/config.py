@@ -13,7 +13,7 @@ class BaseConfig:
     # database configuration (Supabase PostgreSQL)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "https://zrggqljxfrnhlnlqjcgf.supabase.co"
+        "sqlite:///ecolearn.db"
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -31,13 +31,18 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(formData);
-      navigate("/dashboard");
+      const res = await register(formData);
+      if (res.success) {
+        navigate("/dashboard");
+      } else {
+        setError(res.message || "Registration failed. Please try again.");
+      }
     } catch (err) {
-      setError(
-        err?.response?.data?.error ||
-          "Registration failed. Please try again."
-      );
+      console.error("Registration error:", err);
+      const errorMessage = err?.response?.data?.error || 
+                          err?.message || 
+                          "Registration failed. Please check your connection and try again.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

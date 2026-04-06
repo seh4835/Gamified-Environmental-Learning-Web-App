@@ -13,7 +13,6 @@ import Modules from "../pages/Modules";
 import ModuleDetail from "../pages/ModuleDetail";
 import Admin from "../pages/Admin";
 import Submissions from "../pages/Submissions";
-
 // Route Protection
 import ProtectedRoute from "./ProtectedRoute";
 

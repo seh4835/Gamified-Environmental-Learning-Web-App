@@ -6,14 +6,17 @@ import api from "../../services/api";
 export default function Modules() {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchModules = async () => {
       try {
         const res = await api.get("/modules");
+        console.log("Modules response:", res.data);
         setModules(res.data);
       } catch (error) {
         console.error("Failed to fetch modules:", error);
+        setError(error.response?.data?.error || error.message || "Failed to load modules");
       } finally {
         setLoading(false);
       }
@@ -24,6 +27,27 @@ export default function Modules() {
 
   if (loading) {
     return <Loader fullScreen text="Loading sustainability curriculum..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-100 rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-bold text-red-700 mb-2">Error Loading Modules</h2>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!modules || modules.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 text-lg">No modules available yet.</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -16,7 +16,7 @@ export default function Login() {
     const[loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
-        setFoormData((prev) => ({
+        setFormData((prev) => ({
             ...prev,
             [e.target.name]: e.target.value,
         }));
@@ -28,8 +28,12 @@ export default function Login() {
         setLoading(true);
 
         try{
-            await login(formData.email, formData.password);
-            navigate("/dashboard");
+            const res = await login(formData);
+            if (res.success) {
+                navigate("/dashboard");
+            } else {
+                setError(res.message);
+            }
         }
         catch (err) {
             setError(
@@ -43,7 +47,7 @@ export default function Login() {
     };
 
     if (loading) {
-        return <Loader fullscreen text = " Signing you in..." />;
+        return <Loader fullScreen text="Signing you in..." />;
     }
 
     return (
@@ -89,10 +93,10 @@ export default function Login() {
                             Password
                         </label>
                         <input
-                        type= "password"
-                        name = "password"
+                        type="password"
+                        name="password"
                         required
-                        value= {form.Data.password}
+                        value={formData.password}
                         onChange={handleChange}
                         className= "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                         placeholder = "Enter your password"

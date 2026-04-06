@@ -1,8 +1,4 @@
 import { Link } from "react-router-dom";
-// import heroIllustration from "../assets/hero-illustration.svg";
-// import leafIcon from "../assets/icons/leaf.svg";
-// import recycleIcon from "../assets/icons/recycle.svg";
-// import trophyIcon from "../assets/icons/trophy.svg";
 
 export default function Home() {
   return (
@@ -46,13 +42,9 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Right Illustration */}
-          <div className="flex justify-center">
-            <img
-              src={heroIllustration}
-              alt="EcoLearn Sustainability Illustration"
-              className="w-full max-w-md object-contain"
-            />
+          {/* Right Illustration - Using Emoji */}
+          <div className="flex justify-center items-center">
+            <div className="text-8xl">🌍</div>
           </div>
 
         </div>
@@ -73,8 +65,8 @@ export default function Home() {
 
             {/* Learn */}
             <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4">
-                <img src={leafIcon} alt="Learn" className="h-12 w-12" />
+              <div className="flex justify-center mb-4 text-5xl">
+                🌱
               </div>
               <h3 className="text-xl font-semibold text-gray-800">Learn</h3>
               <p className="mt-3 text-sm text-gray-600">
@@ -85,8 +77,8 @@ export default function Home() {
 
             {/* Act */}
             <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4">
-                <img src={recycleIcon} alt="Act" className="h-12 w-12" />
+              <div className="flex justify-center mb-4 text-5xl">
+                ♻️
               </div>
               <h3 className="text-xl font-semibold text-gray-800">Act</h3>
               <p className="mt-3 text-sm text-gray-600">
@@ -97,8 +89,8 @@ export default function Home() {
 
             {/* Earn */}
             <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4">
-                <img src={trophyIcon} alt="Earn" className="h-12 w-12" />
+              <div className="flex justify-center mb-4 text-5xl">
+                🏆
               </div>
               <h3 className="text-xl font-semibold text-gray-800">Earn</h3>
               <p className="mt-3 text-sm text-gray-600">

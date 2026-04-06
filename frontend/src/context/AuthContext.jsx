@@ -32,18 +32,33 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
 
       if (!token) {
         setLoading(false);
         return;
       }
 
+      // If user data is cached in localStorage, use it immediately
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          setLoading(false);
+          return;
+        } catch (e) {
+          console.error("Failed to parse saved user:", e);
+        }
+      }
+
+      // Otherwise fetch fresh profile from server
       try {
         const res = await getProfile();
         setUser(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
       } catch (err) {
         console.error("Auth init failed:", err);
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser(null);
       } finally {
         setLoading(false);
@@ -64,12 +79,11 @@ export const AuthProvider = ({ children }) => {
       const res = await loginUser(credentials);
 
       const token = res.data.access_token;
+      const user = res.data.user;
 
       localStorage.setItem("token", token);
-
-      // fetch user profile after login
-      const userRes = await getProfile();
-      setUser(userRes.data);
+      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
 
       return { success: true };
     } catch (err) {
@@ -115,6 +129,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
 
     // redirect
@@ -138,7 +153,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

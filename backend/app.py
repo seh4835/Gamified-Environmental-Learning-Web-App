@@ -67,6 +67,94 @@ def create_app():
             "version": "1.0.0"
         }), 200
 
+    # Seed Database Endpoint
+    @app.route("/api/seed", methods=["POST"])
+    def seed_database():
+        """
+        Seed the database with learning modules.
+        """
+        from models import LearningModule
+        
+        modules_data = [
+            {
+                "title": "Climate Change & Global Warming",
+                "description": "This module explores the scientific basis of climate change, greenhouse gas emissions, anthropogenic impacts, global temperature rise, and mitigation strategies such as carbon reduction and renewable transition.",
+                "difficulty": "Beginner",
+                "points": 50
+            },
+            {
+                "title": "Waste Management & Circular Economy",
+                "description": "Learn about solid waste management, recycling systems, composting, plastic pollution, and how circular economy principles reduce environmental degradation.",
+                "difficulty": "Beginner",
+                "points": 50
+            },
+            {
+                "title": "Water Conservation & Sustainable Usage",
+                "description": "Understand groundwater depletion, water scarcity challenges, rainwater harvesting systems, and sustainable water management practices.",
+                "difficulty": "Beginner",
+                "points": 50
+            },
+            {
+                "title": "Renewable Energy Systems",
+                "description": "Study solar, wind, hydro, and biomass energy systems and their role in reducing fossil fuel dependency.",
+                "difficulty": "Intermediate",
+                "points": 70
+            },
+            {
+                "title": "Biodiversity & Ecosystem Protection",
+                "description": "Explore ecosystem balance, habitat destruction, species extinction, and biodiversity conservation strategies.",
+                "difficulty": "Intermediate",
+                "points": 70
+            },
+            {
+                "title": "Sustainable Agriculture & Food Systems",
+                "description": "Learn about organic farming, soil conservation, water-efficient irrigation, and food sustainability practices.",
+                "difficulty": "Intermediate",
+                "points": 80
+            },
+            {
+                "title": "Urban Sustainability & Smart Cities",
+                "description": "Examine green infrastructure, sustainable transport systems, waste-efficient urban planning, and smart city innovations.",
+                "difficulty": "Advanced",
+                "points": 90
+            },
+            {
+                "title": "Carbon Footprint & Lifestyle Choices",
+                "description": "Calculate and reduce personal carbon footprints through lifestyle modifications and responsible consumption.",
+                "difficulty": "Advanced",
+                "points": 100
+            },
+            {
+                "title": "Environmental Policy & SDGs",
+                "description": "Understand global environmental policies, India's NEP 2020 integration, and the UN Sustainable Development Goals.",
+                "difficulty": "Advanced",
+                "points": 100
+            },
+            {
+                "title": "Community Action & Grassroots Sustainability",
+                "description": "Learn how local community initiatives drive sustainable development through eco-clubs, clean-up drives, and collective action.",
+                "difficulty": "Advanced",
+                "points": 120
+            }
+        ]
+        
+        try:
+            # Check if modules already exist
+            existing_count = LearningModule.query.count()
+            if existing_count > 0:
+                return jsonify({"message": f"Database already has {existing_count} modules"}), 200
+            
+            # Add modules
+            for data in modules_data:
+                module = LearningModule(**data)
+                db.session.add(module)
+            
+            db.session.commit()
+            return jsonify({"message": "Modules seeded successfully!", "count": len(modules_data)}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
+
     # Global Error Handlers
     @app.errorhandler(404)
     def not_found(error):
@@ -81,6 +169,16 @@ def create_app():
 
 # Application Bootstrap
 app = create_app()
+
+# Create database tables on startup (with error handling)
+with app.app_context():
+    try:
+        db.create_all()
+        print("✅ Database tables created/verified!")
+    except Exception as e:
+        print(f"⚠️  Database connection issue: {e}")
+        print("Make sure DATABASE_URL in .env is correct and the database is accessible.")
+        print("Server will continue running, but database operations may fail.")
 
 if __name__ == "__main__":
     
