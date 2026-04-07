@@ -1,6 +1,6 @@
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from extensions import jwt_required
 
 from models import User
 
@@ -10,58 +10,60 @@ leaderboard_bp=Blueprint("leaderboard", __name__)
 #Global Leaderboard
 @leaderboard_bp.route("/", methods=["GET"])
 @jwt_required()
-
 def global_leaderboard():
-    limit=request.args.get("limit", default=10, type=int)
-    users=(
-        User.query
-        .filter_by(role="student")
-        .order_by(User.eco_points.desc())
-        .limit(limit)
-        .all()
-    )
+    try:
+        limit = request.args.get("limit", default=50, type=int)
+        users = (
+            User.query
+            .filter_by(role="student")
+            .order_by(User.eco_points.desc())
+            .limit(limit)
+            .all()
+        )
 
-    result=[]
-    rank=1
-    for user in users:
-        result.append({
-            "rank": rank,
-            "user_id": user.id,
-            "name": user.name,
-            "institution": user.institution,
-            "eco_points": user.eco_points
-        })
-        rank+=1
+        result = []
+        rank = 1
+        for user in users:
+            result.append({
+                "id": int(user.id),
+                "rank": rank,
+                "name": user.name,
+                "institution": user.institution,
+                "eco_points": int(user.eco_points) if user.eco_points else 0
+            })
+            rank += 1
 
-    return jsonify(result), 200
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 #School-wise Leaderboard
 @leaderboard_bp.route("/school/<string:institution>", methods=["GET"])
 @jwt_required()
-
 def school_leaderboard(institution):
-    users=(
-        User.query
-        .filter_by(role="student", institution=institution)
-        .order_by(User.eco_points.desc())
-        .all()
-    )
+    try:
+        users = (
+            User.query
+            .filter_by(role="student", institution=institution)
+            .order_by(User.eco_points.desc())
+            .all()
+        )
 
-    if not users:
-        return jsonify({"message": "No users found for this institution"}), 404
-    
-    result=[]
-    rank=1
-    for user in users:
-        result.append({
-            "rank": rank,
-            "user_id": user.id,
-            "name": user.name,
-            "eco_points": user.eco_points
-        })
-        rank+=1
+        if not users:
+            return jsonify([]), 200
+        
+        result = []
+        rank = 1
+        for user in users:
+            result.append({
+                "id": int(user.id),
+                "rank": rank,
+                "name": user.name,
+                "institution": user.institution,
+                "eco_points": int(user.eco_points) if user.eco_points else 0
+            })
+            rank += 1
 
-    return jsonify({
-        "institution": institution,
-        "leaderboard": result
-    }), 200
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

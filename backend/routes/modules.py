@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required
+from extensions import jwt_required
 from models import LearningModule, QuizQuestion
 from extensions import db
 

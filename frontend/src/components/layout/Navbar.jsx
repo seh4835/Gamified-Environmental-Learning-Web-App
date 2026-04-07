@@ -1,37 +1,42 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-// import logo from "../../assets/logo.png"; // optional: replace with your logo path
 
 export default function Navbar() {
   const { user, logout } = useAuth();
 
   const baseLinkClasses =
-    "px-3 py-2 rounded-md text-sm font-medium transition-colors";
+    "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap";
   const activeClasses = "bg-green-600 text-white";
   const inactiveClasses =
     "text-gray-700 hover:text-green-700 hover:bg-green-50";
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Left: Logo + Brand */}
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              {/* Logo (optional) */}
-              {/* <img
-                src={logo}
-                alt="EcoLearn Logo"
-                className="h-8 w-8 object-contain"
-              /> */}
-              <span className="text-lg font-semibold text-green-700">
+      <div className="max-w-full mx-auto px-6 py-0">
+        {/* Desktop/Tablet Layout */}
+        <div className="flex h-16 items-center justify-between gap-8">
+          {/* Left: Logo */}
+          <div className="flex-shrink-0">
+            <Link to="/" className="flex items-center gap-2" title="Home">
+              <span className="text-xl font-bold text-green-700">
                 🌿 EcoLearn
               </span>
             </Link>
           </div>
 
-          {/* Center: Navigation Links */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Center: Main Navigation */}
+          <div className="hidden lg:flex items-center gap-1">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `${baseLinkClasses} ${
+                  isActive ? activeClasses : inactiveClasses
+                }`
+              }
+            >
+              Home
+            </NavLink>
+
             <NavLink
               to="/modules"
               className={({ isActive }) =>
@@ -65,7 +70,6 @@ export default function Navbar() {
               Leaderboard
             </NavLink>
 
-            {/* AR Scan Link */}
             <a
               href="/ar/scan.html"
               target="_blank"
@@ -74,59 +78,96 @@ export default function Navbar() {
             >
               AR Scan
             </a>
-
-            {user && user.role !== "student" && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  `${baseLinkClasses} ${
-                    isActive ? activeClasses : inactiveClasses
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
-            )}
           </div>
 
-          {/* Right: Auth Buttons / User Menu */}
-          <div className="flex items-center gap-3">
+          {/* Right: User Menu / Auth */}
+          <div className="flex items-center gap-4 ml-auto">
             {!user ? (
               <>
-                <Link
+                <NavLink
                   to="/login"
-                  className="text-sm font-medium text-gray-700 hover:text-green-700"
+                  className={({ isActive }) =>
+                    `text-sm font-medium ${
+                      isActive ? "text-green-600" : "text-gray-700 hover:text-green-700"
+                    }`
+                  }
                 >
                   Login
-                </Link>
-                <Link
+                </NavLink>
+                <NavLink
                   to="/register"
-                  className="inline-flex items-center px-4 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-md text-sm font-medium transition ${
+                      isActive
+                        ? "bg-green-700 text-white"
+                        : "bg-green-600 text-white hover:bg-green-700"
+                    }`
+                  }
                 >
-                  Get Started
-                </Link>
+                  Register
+                </NavLink>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link
+              <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
+                <NavLink
                   to="/dashboard"
-                  className="text-sm font-medium text-gray-700 hover:text-green-700"
+                  className={({ isActive }) =>
+                    `text-sm font-medium ${
+                      isActive ? "text-green-600" : "text-gray-700 hover:text-green-700"
+                    }`
+                  }
                 >
                   Dashboard
-                </Link>
+                </NavLink>
 
-                <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs text-gray-500">
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `text-sm font-medium ${
+                      isActive ? "text-green-600" : "text-gray-700 hover:text-green-700"
+                    }`
+                  }
+                >
+                  Profile
+                </NavLink>
+
+                {user && user.role !== "student" && (
+                  <>
+                    <NavLink
+                      to="/admin"
+                      className={({ isActive }) =>
+                        `text-sm font-medium ${
+                          isActive ? "text-green-600" : "text-gray-700 hover:text-green-700"
+                        }`
+                      }
+                    >
+                      Admin
+                    </NavLink>
+                    <NavLink
+                      to="/admin/submissions"
+                      className={({ isActive }) =>
+                        `text-sm font-medium ${
+                          isActive ? "text-green-600" : "text-gray-700 hover:text-green-700"
+                        }`
+                      }
+                    >
+                      Submissions
+                    </NavLink>
+                  </>
+                )}
+
+                <div className="hidden sm:flex flex-col items-end text-right">
+                  <span className="text-xs text-gray-500 truncate">
                     {user.institution || "Student"}
                   </span>
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-semibold text-gray-800 truncate">
                     {user.name}
                   </span>
                 </div>
 
                 <button
                   onClick={logout}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 transition"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 transition border border-red-200"
                 >
                   Logout
                 </button>

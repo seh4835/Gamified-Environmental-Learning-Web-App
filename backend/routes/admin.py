@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import jwt_required, get_jwt_identity
 from extensions import db
 from models import ChallengeSubmission, EcoChallenge, User
 

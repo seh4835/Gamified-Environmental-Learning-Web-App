@@ -29,6 +29,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
+    app.url_map.strict_slashes = False  # Disable trailing slash redirect for CORS compatibility
 
     # Core configuration
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "eco-learn-secret")
@@ -41,7 +42,13 @@ def create_app():
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
 
     # Initialize Extensions
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, 
+         resources={r"/api/*": {
+             "origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True
+         }})
     db.init_app(app)
     jwt.init_app(app)
 

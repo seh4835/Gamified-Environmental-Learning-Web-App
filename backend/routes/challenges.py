@@ -12,7 +12,7 @@ All routes are prefixed with-/api/challenges
 import os
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 
 from extensions import db

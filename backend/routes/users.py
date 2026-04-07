@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import jwt_required, get_jwt_identity
 
 from models import User, UserBadge, Badge, QuizAttempt, ChallengeSubmission
 from extensions import db

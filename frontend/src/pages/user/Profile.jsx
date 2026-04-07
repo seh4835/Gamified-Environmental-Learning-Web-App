@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/ui/Loader";
 import api from "../../services/api";
 
 export default function Profile() {
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -13,38 +15,14 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get("/users/me");
-        setUser(res.data);
-        setFormData({
-          name: res.data.name,
-          institution: res.data.institution
-        });
-      } catch (err) {
-        console.error("Profile fetch failed:", err);
-
-        // fallback demo user
-        const demoUser = {
-          name: "Seher Sanghani",
-          email: "seher@student.com",
-          role: "student",
-          institution: "Atlas SkillTech University",
-          eco_points: 320
-        };
-
-        setUser(demoUser);
-        setFormData({
-          name: demoUser.name,
-          institution: demoUser.institution
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
+    if (authUser) {
+      setUser(authUser);
+      setFormData({
+        name: authUser.name,
+        institution: authUser.institution
+      });
+    }
+  }, [authUser]);
 
   const handleUpdate = async () => {
     try {
@@ -56,7 +34,7 @@ export default function Profile() {
     }
   };
 
-  if (loading) {
+  if (loading || !user) {
     return <Loader fullScreen text="Loading profile..." />;
   }
 
