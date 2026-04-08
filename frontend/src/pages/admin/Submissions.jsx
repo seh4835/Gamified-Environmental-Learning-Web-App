@@ -2,175 +2,160 @@ import { useEffect, useState } from "react";
 import Loader from "../../components/ui/Loader";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import challengeIcon from "../../icons/icon_challenge.png";
+
+const STATUS_STYLES = {
+  Approved: { chipClass: "chip-green",  label: "Approved" },
+  Pending:  { chipClass: "chip-gold",   label: "Pending" },
+  Rejected: { chipClass: "chip-red",    label: "Rejected" },
+};
 
 export default function Submissions() {
   const { user } = useAuth();
-
-  const isAdmin =
-    user?.role === "teacher" || user?.role === "admin";
+  const isAdmin = user?.role === "teacher" || user?.role === "admin";
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const [actionLoading, setActionLoading] = useState(null);
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
+  useEffect(() => { fetchSubmissions(); }, []);
 
   const fetchSubmissions = async () => {
     try {
       const res = await api.get("/challenges/submissions");
       setSubmissions(res.data);
-    } catch (err) {
-      console.error("Error fetching submissions:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Error:", err); }
+    finally { setLoading(false); }
   };
 
-  // ✅ ADMIN ACTION: APPROVE / REJECT
   const updateStatus = async (id, status) => {
+    setActionLoading(id + status);
     try {
-      await api.put(`/challenges/submissions/${id}`, {
-        status,
-      });
-
-      // update UI instantly
-      setSubmissions((prev) =>
-        prev.map((s) =>
-          s.id === id
-            ? {
-                ...s,
-                status,
-                points: status === "Approved" ? 50 : 0,
-              }
-            : s
-        )
-      );
-    } catch (err) {
-      console.error("Error updating submission:", err);
-    }
+      await api.put(`/challenges/submissions/${id}`, { status });
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+    } catch (err) { console.error("Error:", err); }
+    finally { setActionLoading(null); }
   };
 
-  if (loading) {
-    return <Loader fullScreen text="Loading submissions..." />;
-  }
+  if (loading) return <Loader fullScreen text="Loading submissions..." />;
 
-  const statusStyles = {
-    Approved: "bg-green-100 text-green-700",
-    Pending: "bg-yellow-100 text-yellow-700",
-    Rejected: "bg-red-100 text-red-700",
+  const filtered = submissions.filter(s => filter === "All" || s.status === filter);
+  const counts = {
+    All: submissions.length,
+    Pending: submissions.filter(s => s.status === "Pending").length,
+    Approved: submissions.filter(s => s.status === "Approved").length,
+    Rejected: submissions.filter(s => s.status === "Rejected").length,
   };
-
-  const filtered = submissions.filter((s) =>
-    filter === "All" ? true : s.status === filter
-  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12">
-      <div className="max-w-6xl mx-auto">
+    <div style={{ minHeight: "100vh", background: "#000", color: "#e2e8f0" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem 1rem" }}>
 
-        {/* HEADER */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isAdmin ? "Manage Submissions" : "My Submissions"}
-          </h1>
-          <p className="mt-3 text-gray-600">
-            {isAdmin
-              ? "Approve or reject student eco-challenge submissions."
-              : "Track your eco-challenge submissions and rewards."}
-          </p>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }} className="animate-fadeIn">
+          <img src={challengeIcon} alt="" style={{ width: 52, height: 52, filter: "drop-shadow(0 0 12px rgba(168,85,247,0.7))" }} />
+          <div>
+            <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.8rem", color: "#f1f5f9" }}>
+              {isAdmin ? "MANAGE " : "MY "}<span style={{ color: "var(--neon-purple)" }} className="glow-purple">SUBMISSIONS</span>
+            </h1>
+            <p style={{ color: "#64748b", fontFamily: "var(--font-heading)", fontSize: "0.72rem", letterSpacing: "0.1em" }}>
+              {isAdmin ? "REVIEW & APPROVE STUDENT CHALLENGE PROOFS" : "TRACK YOUR CHALLENGE SUBMISSIONS & REWARDS"}
+            </p>
+          </div>
         </div>
 
-        {/* FILTER */}
-        <div className="flex gap-3 mb-8">
-          {["All", "Approved", "Pending", "Rejected"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-full text-sm ${
-                filter === tab
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-100 hover:bg-green-100"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* GRID */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {filtered.map((submission) => (
-            <div
-              key={submission.id}
-              className="bg-white border rounded-2xl shadow-md p-6 hover:shadow-xl transition"
-            >
-              <div className="flex justify-between mb-3">
-                <h2 className="font-semibold text-lg">
-                  {submission.module}
-                </h2>
-
-                <span
-                  className={`px-3 py-1 text-xs rounded-full ${
-                    statusStyles[submission.status]
-                  }`}
-                >
-                  {submission.status}
-                </span>
-              </div>
-
-              <p className="text-sm text-gray-700 mb-2">
-                {submission.task}
-              </p>
-
-              <p className="text-xs text-gray-500 mb-4">
-                Submitted on {submission.created_at}
-              </p>
-
-              <div className="flex justify-between items-center">
-
-                <span className="text-green-600 font-semibold text-sm">
-                  {submission.points > 0
-                    ? `+${submission.points} Eco Points`
-                    : "No points yet"}
-                </span>
-
-                <button className="text-sm text-green-600 hover:underline">
-                  View Proof
-                </button>
-              </div>
-
-              {/* 🔥 ADMIN ACTIONS */}
-              {isAdmin && submission.status === "Pending" && (
-                <div className="flex gap-3 mt-4">
-                  <button
-                    onClick={() =>
-                      updateStatus(submission.id, "Approved")
-                    }
-                    className="flex-1 bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
-                  >
-                    Approve
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      updateStatus(submission.id, "Rejected")
-                    }
-                    className="flex-1 bg-red-500 text-white py-2 rounded-md hover:bg-red-600"
-                  >
-                    Reject
-                  </button>
-                </div>
-              )}
+        {/* Stats row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+          {Object.entries(counts).map(([k, v]) => (
+            <div key={k} className="game-card" style={{ textAlign: "center", padding: "1rem" }}>
+              <p style={{ fontFamily: "var(--font-heading)", fontSize: "1.8rem", fontWeight: 900, color: k === "Approved" ? "var(--neon-green)" : k === "Pending" ? "var(--neon-gold)" : k === "Rejected" ? "var(--neon-red)" : "#f1f5f9", lineHeight: 1 }}>{v}</p>
+              <p style={{ fontFamily: "var(--font-heading)", fontSize: "0.6rem", color: "#64748b", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4 }}>{k}</p>
             </div>
           ))}
         </div>
 
-        {filtered.length === 0 && (
-          <p className="text-center text-gray-500 mt-10">
-            No submissions found.
-          </p>
+        {/* Filter tabs */}
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+          {["All", "Pending", "Approved", "Rejected"].map(tab => (
+            <button key={tab} onClick={() => setFilter(tab)} style={{
+              padding: "0.4rem 1rem",
+              borderRadius: 6,
+              border: `1px solid ${filter === tab ? "var(--neon-green)" : "var(--bg-border)"}`,
+              background: filter === tab ? "rgba(0,255,136,0.12)" : "transparent",
+              color: filter === tab ? "var(--neon-green)" : "#64748b",
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.68rem", letterSpacing: "0.1em",
+              cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s",
+            }}>{tab} ({counts[tab]})</button>
+          ))}
+        </div>
+
+        {/* Grid */}
+        {filtered.length === 0 ? (
+          <div className="game-card" style={{ textAlign: "center", padding: "3rem" }}>
+            <p style={{ color: "#64748b", fontFamily: "var(--font-heading)" }}>No submissions found.</p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
+            {filtered.map(sub => {
+              const st = STATUS_STYLES[sub.status] || STATUS_STYLES.Pending;
+              return (
+                <div key={sub.id} className="game-card" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {/* Header row */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "0.95rem", color: "#f1f5f9", fontWeight: 700, flex: 1 }}>
+                      {sub.module}
+                    </h2>
+                    <span className={`stat-chip ${st.chipClass}`} style={{ fontSize: "0.6rem", flexShrink: 0 }}>{st.label}</span>
+                  </div>
+
+                  {isAdmin && (
+                    <p style={{ fontSize: "0.78rem", color: "var(--neon-blue)", fontFamily: "var(--font-heading)", letterSpacing: "0.06em" }}>
+                      Student: {sub.user}
+                    </p>
+                  )}
+
+                  {sub.task && (
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", lineHeight: 1.5 }}>{sub.task}</p>
+                  )}
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "var(--font-heading)", fontSize: "0.68rem", color: sub.status === "Approved" ? "var(--neon-green)" : "#64748b" }}>
+                      {sub.status === "Approved" ? `+${sub.points || 50} XP AWARDED` : sub.points > 0 ? `${sub.points} XP` : "Pending Review"}
+                    </span>
+                    <span style={{ fontSize: "0.68rem", color: "#374151", fontFamily: "var(--font-heading)" }}>
+                      {sub.created_at}
+                    </span>
+                  </div>
+
+                  {/* Admin approve/reject */}
+                  {isAdmin && sub.status === "Pending" && (
+                    <div style={{ display: "flex", gap: "0.75rem", marginTop: 4 }}>
+                      <button
+                        onClick={() => updateStatus(sub.id, "Approved")}
+                        disabled={actionLoading === sub.id + "Approved"}
+                        className="btn-primary"
+                        style={{ flex: 1, justifyContent: "center", padding: "0.5rem", fontSize: "0.68rem",
+                          opacity: actionLoading === sub.id + "Approved" ? 0.7 : 1 }}
+                      >
+                        {actionLoading === sub.id + "Approved" ? "..." : "Approve"}
+                      </button>
+                      <button
+                        onClick={() => updateStatus(sub.id, "Rejected")}
+                        disabled={actionLoading === sub.id + "Rejected"}
+                        className="btn-danger"
+                        style={{ flex: 1, justifyContent: "center", padding: "0.5rem", fontSize: "0.68rem",
+                          opacity: actionLoading === sub.id + "Rejected" ? 0.7 : 1 }}
+                      >
+                        {actionLoading === sub.id + "Rejected" ? "..." : "Reject"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

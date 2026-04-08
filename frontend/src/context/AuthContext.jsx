@@ -136,6 +136,12 @@ export const AuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
+  const updateUser = (updates) => {
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   /*
   |--------------------------------------------------------------------------
   | CONTEXT VALUE
@@ -148,7 +154,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     login,
     register,
-    logout
+    logout,
+    updateUser
   };
 
   return (

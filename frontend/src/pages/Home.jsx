@@ -1,149 +1,224 @@
 import { Link } from "react-router-dom";
+import heroBanner from "../icons/hero_banner.png";
+import leafIcon from "../icons/icon_leaf.png";
+import modulesIcon from "../icons/icon_modules.png";
+import challengeIcon from "../icons/icon_challenge.png";
+import trophyIcon from "../icons/icon_trophy.png";
 
 export default function Home() {
+  const features = [
+    {
+      icon: modulesIcon,
+      title: "Learn",
+      desc: "Unlock 10 interactive modules on climate, waste, water, biodiversity & more. Earn XP with every slide.",
+      color: "var(--neon-blue)",
+      glow: "0 0 20px rgba(56,189,248,0.3)",
+    },
+    {
+      icon: challengeIcon,
+      title: "Act",
+      desc: "Complete real-world eco challenges — plant a tree, reduce waste, save water — and submit proof.",
+      color: "var(--neon-purple)",
+      glow: "0 0 20px rgba(168,85,247,0.3)",
+    },
+    {
+      icon: trophyIcon,
+      title: "Earn",
+      desc: "Gain eco-points, unlock exclusive badges, climb the leaderboard and become a Sustainability Hero.",
+      color: "var(--neon-gold)",
+      glow: "0 0 20px rgba(251,191,36,0.3)",
+    },
+  ];
+
+  const stats = [
+    { value: "10", label: "Learning Modules" },
+    { value: "10+", label: "Eco Challenges" },
+    { value: "6", label: "Badges to Unlock" },
+    { value: "AR", label: "Augmented Reality" },
+  ];
+
   return (
-    <div className="flex flex-col">
+    <div style={{ background: "#000" }}>
 
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-br from-green-50 to-white py-20">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+      {/* ── HERO ── */}
+      <section style={{ position: "relative", overflow: "hidden", minHeight: "92vh", display: "flex", alignItems: "center" }}>
+        {/* Background image */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url(${heroBanner})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.35,
+        }} />
+        {/* Overlay gradient */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(135deg, rgba(8,12,20,0.95) 0%, rgba(8,12,20,0.7) 50%, rgba(8,12,20,0.9) 100%)",
+        }} />
+        {/* Grid pattern */}
+        <div className="grid-bg" style={{ position: "absolute", inset: 0, opacity: 0.5 }} />
 
-          {/* Left Content */}
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-              Transform Environmental Education
-              <span className="text-green-600"> Through Action</span>
+        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "4rem 2rem", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+
+          {/* LEFT */}
+          <div className="animate-fadeIn">
+            <div className="stat-chip chip-green" style={{ marginBottom: "1.5rem" }}>
+              Gamified Environmental Learning
+            </div>
+
+            <h1 style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(2.2rem, 4vw, 3.8rem)",
+              fontWeight: 900,
+              lineHeight: 1.1,
+              color: "#f1f5f9",
+              marginBottom: "1.5rem",
+            }}>
+              Protect The Planet.{" "}
+              <span style={{ color: "var(--neon-green)" }} className="glow-green">
+                Level Up.
+              </span>
             </h1>
 
-            <p className="mt-6 text-lg text-gray-600">
-              EcoLearn is a gamified sustainability platform that empowers
-              students to learn environmental concepts, take real-world eco
-              actions, and earn recognition through eco-points and badges.
+            <p style={{ fontSize: "1.05rem", color: "#94a3b8", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: 480 }}>
+              EcoLearn turns environmental education into an epic quest.
+              Learn sustainability concepts, complete real-world eco challenges,
+              and earn points &amp; badges as you level up.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link
-                to="/modules"
-                className="px-6 py-3 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition"
-              >
-                Start Learning
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <Link to="/register" className="btn-primary">
+                Start Your Quest
               </Link>
-
-              <Link
-                to="/challenges"
-                className="px-6 py-3 rounded-md border border-green-600 text-green-700 font-medium hover:bg-green-50 transition"
-              >
-                Take Eco Challenges
+              <Link to="/leaderboard" className="btn-secondary">
+                View Leaderboard
               </Link>
             </div>
 
-            <p className="mt-6 text-sm text-gray-500">
-              Aligned with India’s SDG goals and NEP 2020 experiential learning vision.
+            <p style={{ marginTop: "2rem", fontSize: "0.78rem", color: "#475569", fontFamily: "var(--font-heading)", letterSpacing: "0.06em" }}>
+              Aligned with India's SDG goals and NEP 2020
             </p>
           </div>
 
-          {/* Right Illustration - Using Emoji */}
-          <div className="flex justify-center items-center">
-            <div className="text-8xl">🌍</div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* LEARN → ACT → EARN SECTION */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Learn → Act → Earn
-          </h2>
-
-          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-            EcoLearn bridges the gap between textbook knowledge and real-world sustainability practices.
-          </p>
-
-          <div className="mt-14 grid md:grid-cols-3 gap-10">
-
-            {/* Learn */}
-            <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4 text-5xl">
-                🌱
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">Learn</h3>
-              <p className="mt-3 text-sm text-gray-600">
-                Interactive modules on climate change, waste management,
-                renewable energy, and water conservation.
-              </p>
+          {/* RIGHT — floating icon */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div className="animate-float" style={{
+              width: 260, height: 260,
+              background: "radial-gradient(circle at 40% 40%, rgba(0,255,136,0.15), transparent 70%)",
+              border: "1px solid rgba(0,255,136,0.2)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 0 60px rgba(0,255,136,0.15), inset 0 0 40px rgba(0,255,136,0.05)",
+            }}>
+              <img src={leafIcon} alt="EcoLearn" style={{ width: 160, height: 160, objectFit: "contain", filter: "drop-shadow(0 0 20px rgba(0,255,136,0.7))" }} />
             </div>
-
-            {/* Act */}
-            <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4 text-5xl">
-                ♻️
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">Act</h3>
-              <p className="mt-3 text-sm text-gray-600">
-                Complete real-world eco challenges like tree planting,
-                waste segregation, and water-saving initiatives.
-              </p>
-            </div>
-
-            {/* Earn */}
-            <div className="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="flex justify-center mb-4 text-5xl">
-                🏆
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">Earn</h3>
-              <p className="mt-3 text-sm text-gray-600">
-                Gain eco-points, unlock badges, and compete in school-level
-                leaderboards.
-              </p>
-            </div>
-
           </div>
         </div>
       </section>
 
-      {/* AR INNOVATION SECTION */}
-      <section className="py-20 bg-green-50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Scan & Learn with AR
+      {/* ── STATS BAR ── */}
+      <div style={{
+        background: "var(--bg-card)",
+        borderTop: "1px solid rgba(0,255,136,0.1)",
+        borderBottom: "1px solid rgba(0,255,136,0.1)",
+      }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem 2rem", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+          {stats.map((s) => (
+            <div key={s.label} style={{ textAlign: "center" }}>
+              <p style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", fontWeight: 900, color: "var(--neon-green)" }} className="glow-green">
+                {s.value}
+              </p>
+              <p style={{ fontSize: "0.78rem", color: "#64748b", fontFamily: "var(--font-heading)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {s.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FEATURES ── */}
+      <section style={{ padding: "6rem 2rem" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <h2 className="game-section-title" style={{ fontSize: "2rem" }}>How It Works</h2>
+            <p className="game-section-sub">Three steps to becoming an Eco Champion</p>
+            <div className="neon-divider" style={{ maxWidth: 200, margin: "0 auto" }} />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2rem" }}>
+            {features.map((f, i) => (
+              <div key={f.title} className="game-card" style={{ borderColor: `${f.color}22` }}>
+                <div style={{
+                  width: 80, height: 80,
+                  background: `linear-gradient(135deg, ${f.color}22, transparent)`,
+                  border: `1px solid ${f.color}44`,
+                  borderRadius: 16,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  marginBottom: "1.5rem",
+                  boxShadow: f.glow,
+                }}>
+                  <img src={f.icon} alt={f.title} style={{ width: 48, height: 48, objectFit: "contain" }} />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "1rem" }}>
+                  <span style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "0.65rem",
+                    fontWeight: 700,
+                    color: f.color,
+                    background: `${f.color}18`,
+                    border: `1px solid ${f.color}30`,
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    letterSpacing: "0.1em",
+                  }}>STEP {i + 1}</span>
+                  <h3 style={{ fontFamily: "var(--font-heading)", color: "#f1f5f9", fontSize: "1.1rem" }}>{f.title}</h3>
+                </div>
+
+                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.7 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── AR SECTION ── */}
+      <section style={{ padding: "5rem 2rem", background: "var(--bg-card)", borderTop: "1px solid var(--bg-border)", borderBottom: "1px solid var(--bg-border)" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+          <div className="stat-chip chip-blue" style={{ marginBottom: "1.5rem" }}>
+            Augmented Reality
+          </div>
+          <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
+            Scan Objects. Discover Sustainability.
           </h2>
-
-          <p className="mt-4 text-gray-600">
-            Use augmented reality to interact with everyday objects and discover
-            sustainable practices in real time.
+          <p style={{ color: "#94a3b8", fontSize: "1rem", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: 600, margin: "0 auto 2.5rem" }}>
+            Use your camera to scan everyday objects and unlock eco-insights in real time through our AR experience.
           </p>
-
-          <a
-            href="/ar/scan.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-8 inline-block px-6 py-3 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition"
-          >
-            Open AR Experience
+          <a href="/ar/scan.html" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ color: "var(--neon-blue)", borderColor: "var(--neon-blue)" }}>
+            Launch AR Experience
           </a>
         </div>
       </section>
 
-      {/* CALL TO ACTION */}
-      <section className="py-20 bg-white text-center">
-        <h2 className="text-3xl font-bold text-gray-900">
-          Ready to Make an Impact?
-        </h2>
-
-        <p className="mt-4 text-gray-600">
-          Join EcoLearn today and start building sustainable habits that last a lifetime.
-        </p>
-
-        <Link
-          to="/register"
-          className="mt-8 inline-block px-8 py-3 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition"
-        >
-          Get Started
-        </Link>
+      {/* ── CTA ── */}
+      <section style={{ padding: "6rem 2rem", textAlign: "center" }}>
+        <div className="grid-bg" style={{ padding: "4rem 2rem", borderRadius: 24, border: "1px solid rgba(0,255,136,0.1)", maxWidth: 800, margin: "0 auto", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,255,136,0.05) 0%, transparent 70%)" }} />
+          <div style={{ position: "relative" }}>
+            <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2.2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
+              Ready to Make an <span style={{ color: "var(--neon-green)" }} className="glow-green">Impact?</span>
+            </h2>
+            <p style={{ color: "#64748b", marginBottom: "2rem", fontSize: "1rem" }}>
+              Join EcoLearn and start building sustainable habits that earn real rewards.
+            </p>
+            <Link to="/register" className="btn-primary" style={{ fontSize: "0.85rem", padding: "0.8rem 2rem" }}>
+              Create Your Account
+            </Link>
+          </div>
+        </div>
       </section>
-
     </div>
   );
 }

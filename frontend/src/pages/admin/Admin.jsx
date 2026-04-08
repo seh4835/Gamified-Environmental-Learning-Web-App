@@ -87,7 +87,7 @@ export default function Admin() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12">
+    <div style={{ minHeight: "100vh", background: "#000", padding: "3rem 1.5rem", color: "#e2e8f0" }}>
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}

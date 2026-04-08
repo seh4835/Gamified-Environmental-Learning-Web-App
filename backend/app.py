@@ -185,9 +185,9 @@ app = create_app()
 with app.app_context():
     try:
         db.create_all()
-        print("✅ Database tables created/verified!")
+        print("[OK] Database tables created/verified!")
     except Exception as e:
-        print(f"⚠️  Database connection issue: {e}")
+        print(f"[WARNING] Database connection issue: {e}")
         print("Make sure DATABASE_URL in .env is correct and the database is accessible.")
         print("Server will continue running, but database operations may fail.")
 

@@ -111,9 +111,9 @@ def complete_module(module_id):
     # Award eco points for module completion
     completion_points = module.points
     user.eco_points += completion_points
-    
+
     print(f"DEBUG: Awarding {completion_points} points to user {user_id}")
-    
+
     # Create a completion record (using QuizAttempt as a completion tracker)
     # Set score to -1 to indicate module completion, not a quiz attempt
     completion_record = QuizAttempt(
@@ -121,12 +121,18 @@ def complete_module(module_id):
         module_id=module_id,
         score=-1  # Special value indicating module completion
     )
-    
+
     db.session.add(completion_record)
     db.session.commit()
-    
+
+    # Auto-award any badges the user now qualifies for
+    try:
+        from routes.users import award_badges_for_user
+        award_badges_for_user(user)
+    except Exception as badge_err:
+        print(f"Badge award error (non-critical): {badge_err}")
+
     print(f"DEBUG: Module completion recorded successfully")
-    
     return jsonify({
         "message": f"Congratulations! {module.title} completed!",
         "eco_points": completion_points,

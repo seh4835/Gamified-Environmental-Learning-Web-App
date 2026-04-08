@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Loader from "../components/ui/Loader";
 import api from "../services/api";
+import trophyIcon from "../icons/icon_trophy.png";
+import leafIcon from "../icons/icon_leaf.png";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -11,189 +13,167 @@ export default function Leaderboard() {
     const fetchLeaderboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        
-        if (!token) {
-          setError("You must be logged in to view the leaderboard");
-          setLoading(false);
-          return;
-        }
-
+        if (!token) { setError("You must be logged in to view the leaderboard"); setLoading(false); return; }
         const res = await api.get("/leaderboard");
-        console.log("Leaderboard response:", res.data);
-        
-        // Handle both array and object responses
         const data = Array.isArray(res.data) ? res.data : res.data.leaderboard || [];
-        console.log("Processed data:", data);
         setUsers(data);
-        setError(null);
       } catch (err) {
-        console.error("Leaderboard error:", err.response?.data || err.message);
-        setError(err.response?.data?.error || err.message || "Failed to load leaderboard");
+        setError(err.response?.data?.error || "Failed to load leaderboard");
         setUsers([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchLeaderboard();
   }, []);
 
-  if (loading) {
-    return <Loader fullScreen text="Loading leaderboard..." />;
-  }
+  if (loading) return <Loader fullScreen text="Loading leaderboard..." />;
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md text-center">
-          <h2 className="text-xl font-bold text-red-700 mb-2">Error</h2>
-          <p className="text-red-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!users || users.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12 flex items-center justify-center">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 max-w-md text-center">
-          <h2 className="text-xl font-bold text-yellow-700 mb-2">No Users Yet</h2>
-          <p className="text-yellow-600">Be the first to earn eco points and appear on the leaderboard!</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Function to get badge based on points
-  const getBadge = (points) => {
-    if (points >= 500) {
-      return { icon: "🌍", label: "Sustainability Champion", color: "text-red-600" };
-    } else if (points >= 250) {
-      return { icon: "🏆", label: "Eco Warrior", color: "text-yellow-600" };
-    } else {
-      return { icon: "🌱", label: "Green Beginner", color: "text-green-600" };
-    }
+  const getTier = (pts) => {
+    if (pts >= 500) return { label: "Eco Champion", color: "var(--neon-purple)", chipClass: "chip-purple" };
+    if (pts >= 250) return { label: "Planet Protector", color: "var(--neon-gold)", chipClass: "chip-gold" };
+    if (pts >= 100) return { label: "Eco Explorer", color: "var(--neon-blue)", chipClass: "chip-blue" };
+    return { label: "Eco Starter", color: "var(--neon-green)", chipClass: "chip-green" };
   };
 
-  const top3 = users.slice(0, 3);
-  const rest = users.slice(3);
+  const rankColors = ["var(--neon-gold)", "#94a3b8", "#cd7c3a"];
+  const rankLabels = ["1ST", "2ND", "3RD"];
+  const podiumHeights = [200, 160, 140];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-12">
-      <div className="max-w-5xl mx-auto">
+    <div style={{ minHeight: "100vh", background: "#000", color: "#e2e8f0" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
 
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            🌍 Eco Leaderboard
+        <div style={{ textAlign: "center", marginBottom: "3rem" }} className="animate-fadeIn">
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+            <img src={trophyIcon} alt="" style={{ width: 64, height: 64, filter: "drop-shadow(0 0 16px rgba(251,191,36,0.7))" }} />
+          </div>
+          <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", color: "#f1f5f9", marginBottom: 8 }}>
+            ECO <span style={{ color: "var(--neon-gold)" }} className="glow-gold">LEADERBOARD</span>
           </h1>
-          <p className="text-gray-600 mt-2">
-            Top eco warriors making a difference
+          <p style={{ color: "#64748b", fontFamily: "var(--font-heading)", fontSize: "0.78rem", letterSpacing: "0.1em" }}>
+            TOP ECO WARRIORS MAKING A DIFFERENCE
           </p>
+          <div className="neon-divider" style={{ maxWidth: 300, margin: "1rem auto 0" }} />
         </div>
 
-        {/* 🥇 Top 3 Podium */}
-        <div className="grid grid-cols-3 gap-6 mb-12 text-center">
-
-          {top3.map((user, index) => {
-            const styles = [
-              "bg-yellow-100 text-yellow-700 border-2 border-yellow-300",
-              "bg-gray-200 text-gray-700 border-2 border-gray-300",
-              "bg-orange-100 text-orange-700 border-2 border-orange-300"
-            ];
-
-            const heights = ["h-48", "h-40", "h-36"];
-            const badges = [
-              { icon: "🥇", label: "1st Place" },
-              { icon: "🥈", label: "2nd Place" },
-              { icon: "🥉", label: "3rd Place" }
-            ];
-            const badge = getBadge(user.eco_points);
-
-            return (
-              <div
-                key={user.id}
-                className={`rounded-xl shadow-lg flex flex-col justify-between p-6 ${styles[index]} ${heights[index]} transform transition hover:scale-105`}
-              >
-                <div className="text-4xl mb-2">{badges[index].icon}</div>
-                <div>
-                  <h2 className="font-bold text-lg">{user.name}</h2>
-                  <p className="text-sm font-semibold mt-2">{user.eco_points} pts</p>
-                  <div className={`text-2xl mt-3 ${badge.color}`}>{badge.icon}</div>
-                  <p className="text-xs mt-1 font-medium">{badge.label}</p>
-                </div>
-              </div>
-            );
-          })}
-
-        </div>
-
-        {/* 🏅 Full Leaderboard */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-
-          <h2 className="text-2xl font-bold mb-8 text-gray-800">
-            🏆 Full Rankings
-          </h2>
-
-          <div className="space-y-3">
-
-            {users.map((user, index) => {
-              const badge = getBadge(user.eco_points);
-              const medals = ["🥇", "🥈", "🥉"];
-              const showMedal = index < 3;
-
-              return (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between bg-gradient-to-r from-green-50 to-white p-5 rounded-xl hover:shadow-md transition border border-green-100"
-                >
-                  <div className="flex items-center gap-4 flex-1">
-
-                    {/* Rank */}
-                    <div className="w-8 text-center font-bold text-lg text-gray-700">
-                      {showMedal ? medals[index] : `#${index + 1}`}
-                    </div>
-
-                    {/* Avatar */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-
-                    {/* Name and Badge */}
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-base">
-                        {user.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xl ${badge.color}`}>{badge.icon}</span>
-                        <p className="text-xs text-gray-600 font-medium">
-                          {badge.label}
-                        </p>
+        {error ? (
+          <div className="game-card" style={{ textAlign: "center", borderColor: "rgba(248,113,113,0.3)", padding: "3rem" }}>
+            <p style={{ color: "var(--neon-red)", fontFamily: "var(--font-heading)", marginBottom: "1rem" }}>{error}</p>
+            <button className="btn-danger" onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="game-card" style={{ textAlign: "center", padding: "3rem" }}>
+            <img src={trophyIcon} alt="" style={{ width: 60, opacity: 0.3, margin: "0 auto 1rem" }} />
+            <p style={{ color: "#64748b", fontFamily: "var(--font-heading)" }}>No players yet. Be the first!</p>
+          </div>
+        ) : (
+          <>
+            {/* ── PODIUM ── */}
+            {users.length >= 3 && (
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "1rem", marginBottom: "3rem" }}>
+                {[users[1], users[0], users[2]].map((u, i) => {
+                  const actualRank = i === 0 ? 1 : i === 1 ? 0 : 2;
+                  const h = [podiumHeights[1], podiumHeights[0], podiumHeights[2]][i];
+                  const c = [rankColors[1], rankColors[0], rankColors[2]][i];
+                  const label = [rankLabels[1], rankLabels[0], rankLabels[2]][i];
+                  const tier = getTier(u.eco_points);
+                  return (
+                    <div key={u.id} style={{ flex: 1, maxWidth: 240, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      {/* Player info above podium */}
+                      <div style={{ textAlign: "center", marginBottom: "0.75rem" }}>
+                        <div style={{
+                          width: 56, height: 56, borderRadius: "50%",
+                          background: `linear-gradient(135deg, ${c}33, ${c}11)`,
+                          border: `2px solid ${c}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          margin: "0 auto 8px",
+                          fontFamily: "var(--font-heading)", fontSize: "1.4rem", fontWeight: 900, color: c,
+                        }}>
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <p style={{ fontFamily: "var(--font-heading)", fontSize: "0.82rem", color: "#f1f5f9", fontWeight: 700, marginBottom: 4 }}>{u.name}</p>
+                        <p style={{ fontFamily: "var(--font-heading)", fontSize: "1.1rem", color: c, fontWeight: 900 }}>{u.eco_points} XP</p>
+                      </div>
+                      {/* Podium block */}
+                      <div style={{
+                        width: "100%", height: h,
+                        background: `linear-gradient(180deg, ${c}22, ${c}08)`,
+                        border: `1px solid ${c}44`,
+                        borderBottom: "none",
+                        borderRadius: "12px 12px 0 0",
+                        display: "flex", alignItems: "flex-start", justifyContent: "center",
+                        paddingTop: "1rem",
+                      }}>
+                        <span style={{ fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 900, color: c }}>{label}</span>
                       </div>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+            )}
 
-                  {/* Points */}
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">
-                      {user.eco_points}
-                    </p>
-                    <p className="text-xs text-gray-500">points</p>
-                  </div>
-                </div>
-              );
-            })}
+            {/* ── FULL LIST ── */}
+            <div className="game-card">
+              <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "1rem", color: "#f1f5f9", marginBottom: "1.25rem", letterSpacing: "0.08em" }}>
+                FULL RANKINGS
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {users.map((u, i) => {
+                  const tier = getTier(u.eco_points);
+                  const isTop3 = i < 3;
+                  const rankC = isTop3 ? rankColors[i] : "#374151";
+                  const maxPts = users[0]?.eco_points || 1;
+                  return (
+                    <div key={u.id} style={{
+                      display: "flex", alignItems: "center", gap: "1rem",
+                      padding: "0.9rem 1.1rem",
+                      background: isTop3 ? `linear-gradient(90deg, ${rankColors[i]}08, transparent)` : "var(--bg-dark)",
+                      border: `1px solid ${isTop3 ? rankColors[i] + "33" : "var(--bg-border)"}`,
+                      borderRadius: 10,
+                      transition: "transform 0.2s",
+                    }}>
+                      {/* Rank number */}
+                      <div style={{ width: 36, textAlign: "center", fontFamily: "var(--font-heading)", fontWeight: 900, color: rankC, fontSize: "0.95rem", flexShrink: 0 }}>
+                        {isTop3 ? rankLabels[i] : `#${i + 1}`}
+                      </div>
 
-          </div>
+                      {/* Avatar */}
+                      <div style={{
+                        width: 40, height: 40, borderRadius: "50%",
+                        background: `linear-gradient(135deg, ${rankC}33, ${rankC}11)`,
+                        border: `1.5px solid ${rankC}66`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: "var(--font-heading)", fontWeight: 900, color: rankC, fontSize: "1rem",
+                        flexShrink: 0,
+                      }}>
+                        {u.name.charAt(0).toUpperCase()}
+                      </div>
 
-        </div>
+                      {/* Name + tier + bar */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontFamily: "var(--font-heading)", fontSize: "0.88rem", color: "#f1f5f9", fontWeight: 700 }}>{u.name}</span>
+                          <span className={`stat-chip ${tier.chipClass}`} style={{ fontSize: "0.58rem" }}>{tier.label}</span>
+                        </div>
+                        <div className="xp-bar-track" style={{ height: 5 }}>
+                          <div className="xp-bar-fill" style={{ width: `${(u.eco_points / maxPts) * 100}%` }} />
+                        </div>
+                      </div>
 
+                      {/* Points */}
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <p style={{ fontFamily: "var(--font-heading)", fontWeight: 900, color: tier.color, fontSize: "1.1rem" }}>{u.eco_points}</p>
+                        <p style={{ fontSize: "0.6rem", color: "#475569", fontFamily: "var(--font-heading)", letterSpacing: "0.08em" }}>XP</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
