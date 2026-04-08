@@ -64,6 +64,8 @@ def login():
         identity=user.id,
         expires_delta=timedelta(hours=6)
     )
+    
+    print(f"DEBUG LOGIN: User {user.id} ({user.email}) logged in. Token: {access_token}")
 
     return jsonify({
         "access_token": access_token,

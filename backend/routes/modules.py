@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify
-from extensions import jwt_required
-from models import LearningModule, QuizQuestion
+from flask import Blueprint, jsonify, request
+from extensions import jwt_required, get_jwt_identity
+from models import LearningModule, QuizQuestion, User, QuizAttempt
 from extensions import db
 
 # Blueprint Initialization
@@ -62,3 +62,74 @@ def get_module_detail(module_id):
     }
 
     return jsonify(response), 200
+
+
+# -------------------------------------------
+# COMPLETE MODULE - Award Eco Points
+# -------------------------------------------
+@modules_bp.route("/<int:module_id>/complete", methods=["POST"])
+@jwt_required()
+def complete_module(module_id):
+    """
+    Mark a module as completed and award eco points.
+    Only awards points once per user per module.
+    """
+    user_id = get_jwt_identity()
+    print(f"DEBUG: Attempting to complete module {module_id} for user {user_id}")
+    
+    # Get user
+    user = User.query.get(user_id)
+    if not user:
+        print(f"DEBUG: User {user_id} not found in database")
+        return jsonify({"error": "User not found"}), 404
+    
+    print(f"DEBUG: User found: {user.name} ({user.email})")
+    
+    # Get module
+    module = LearningModule.query.get(module_id)
+    if not module:
+        print(f"DEBUG: Module {module_id} not found")
+        return jsonify({"error": "Module not found"}), 404
+    
+    print(f"DEBUG: Module found: {module.title}")
+    
+    # Check if user already completed this module
+    existing_completion = QuizAttempt.query.filter_by(
+        user_id=user_id,
+        module_id=module_id
+    ).first()
+    
+    # If already completed, don't award points again
+    if existing_completion:
+        print(f"DEBUG: Module already completed by user {user_id}")
+        return jsonify({
+            "message": "Module already completed",
+            "eco_points": 0,
+            "total_eco_points": user.eco_points
+        }), 200
+    
+    # Award eco points for module completion
+    completion_points = module.points
+    user.eco_points += completion_points
+    
+    print(f"DEBUG: Awarding {completion_points} points to user {user_id}")
+    
+    # Create a completion record (using QuizAttempt as a completion tracker)
+    # Set score to -1 to indicate module completion, not a quiz attempt
+    completion_record = QuizAttempt(
+        user_id=user_id,
+        module_id=module_id,
+        score=-1  # Special value indicating module completion
+    )
+    
+    db.session.add(completion_record)
+    db.session.commit()
+    
+    print(f"DEBUG: Module completion recorded successfully")
+    
+    return jsonify({
+        "message": f"Congratulations! {module.title} completed!",
+        "eco_points": completion_points,
+        "total_eco_points": user.eco_points,
+        "module_title": module.title
+    }), 200

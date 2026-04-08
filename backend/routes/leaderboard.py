@@ -1,28 +1,27 @@
-
 from flask import Blueprint, request, jsonify
-from extensions import jwt_required
-
 from models import User
+from sqlalchemy import desc
 
-#Blueprint Initialization
-leaderboard_bp=Blueprint("leaderboard", __name__)
+# Blueprint Initialization
+leaderboard_bp = Blueprint("leaderboard", __name__)
 
-#Global Leaderboard
+# Global Leaderboard (PUBLIC - no JWT)
 @leaderboard_bp.route("/", methods=["GET"])
-@jwt_required()
 def global_leaderboard():
     try:
         limit = request.args.get("limit", default=50, type=int)
+
         users = (
             User.query
-            .filter_by(role="student")
-            .order_by(User.eco_points.desc())
+            .filter(User.role == "student")
+            .order_by(desc(User.eco_points))
             .limit(limit)
             .all()
         )
 
         result = []
         rank = 1
+
         for user in users:
             result.append({
                 "id": int(user.id),
@@ -34,26 +33,28 @@ def global_leaderboard():
             rank += 1
 
         return jsonify(result), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-#School-wise Leaderboard
+
+# School-wise Leaderboard (PUBLIC)
 @leaderboard_bp.route("/school/<string:institution>", methods=["GET"])
-@jwt_required()
 def school_leaderboard(institution):
     try:
         users = (
             User.query
-            .filter_by(role="student", institution=institution)
-            .order_by(User.eco_points.desc())
+            .filter(
+                User.role == "student",
+                User.institution == institution
+            )
+            .order_by(desc(User.eco_points))
             .all()
         )
 
-        if not users:
-            return jsonify([]), 200
-        
         result = []
         rank = 1
+
         for user in users:
             result.append({
                 "id": int(user.id),
@@ -65,5 +66,6 @@ def school_leaderboard(institution):
             rank += 1
 
         return jsonify(result), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500

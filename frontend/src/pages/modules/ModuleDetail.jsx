@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../components/ui/Loader";
 import QuizCard from "../../components/features/quiz/QuizCard";
 import api from "../../services/api";
 
 export default function ModuleDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const moduleId = Number(id);
 
   const [module, setModule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [completionData, setCompletionData] = useState(null);
+  const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
     const fetchModule = async () => {
@@ -192,11 +196,93 @@ export default function ModuleDetail() {
   const prevSlide = () =>
     currentSlide > 0 && setCurrentSlide(currentSlide - 1);
 
+  const completeModule = async () => {
+    setCompleting(true);
+    try {
+      const response = await api.post(`/modules/${moduleId}/complete`);
+      setCompletionData({
+        ecoPoints: response.data.eco_points || 50,
+        message: response.data.message || "Module Completed!"
+      });
+      setShowCelebration(true);
+
+      // Auto-close celebration after 4 seconds
+      setTimeout(() => {
+        setShowCelebration(false);
+        navigate("/modules");
+      }, 4000);
+    } catch (error) {
+      console.error("Failed to complete module:", error);
+      console.error("Error response:", error.response?.data);
+      alert(`Error completing module: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const isLastSlide = currentSlide === slides.length - 1;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-6 py-10">
       <div className="max-w-5xl mx-auto">
 
-        <h1 className="text-3xl font-bold mb-6">{module.title}</h1>
+        {/* Celebration Modal */}
+        {showCelebration && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl p-8 max-w-md text-center animate-bounce">
+              {/* Confetti Animation */}
+              <div className="mb-6">
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-3xl font-bold text-green-600 mb-2">
+                  Congratulations!
+                </h2>
+                <p className="text-xl text-gray-700 font-semibold mb-4">
+                  {module?.title} Completed!
+                </p>
+              </div>
+
+              {/* Eco Points Display */}
+              <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg p-6 mb-6 border-2 border-green-300">
+                <p className="text-gray-600 font-medium mb-2">Eco Points Earned</p>
+                <p className="text-5xl font-bold text-green-600">+{completionData?.ecoPoints}</p>
+                <p className="text-sm text-gray-500 mt-2">Keep learning to earn more!</p>
+              </div>
+
+              {/* Achievement Badge */}
+              <div className="text-center mb-6">
+                <div className="inline-block bg-yellow-100 rounded-full p-6 mb-3">
+                  <span className="text-5xl">🌟</span>
+                </div>
+                <p className="text-sm text-gray-600">You've unlocked a module achievement!</p>
+              </div>
+
+              {/* Closing Message */}
+              <p className="text-gray-500 text-sm">
+                Redirecting to modules... ✨
+              </p>
+            </div>
+          </div>
+        )}
+
+        <h1 className="text-3xl font-bold mb-6">{module?.title}</h1>
+
+        {/* Progress Bar */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-600">
+              Slide {currentSlide + 1} of {slides.length}
+            </span>
+            <span className="text-sm text-gray-500">
+              {Math.round((currentSlide + 1) / slides.length * 100)}% Complete
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-green-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
         {/* Slides */}
         <div className="bg-white p-8 rounded-xl shadow mb-10">
@@ -207,21 +293,41 @@ export default function ModuleDetail() {
             {slides[currentSlide]?.content}
           </p>
 
-          <div className="flex justify-between mt-6">
-            <button onClick={prevSlide} disabled={currentSlide === 0}>
-              Previous
-            </button>
+          <div className="flex justify-between items-center mt-8">
             <button
-              onClick={nextSlide}
-              disabled={currentSlide === slides.length - 1}
+              onClick={prevSlide}
+              disabled={currentSlide === 0}
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              Next
+              ← Previous
             </button>
+
+            <span className="text-sm text-gray-500">
+              {currentSlide + 1} / {slides.length}
+            </span>
+
+            {isLastSlide ? (
+              <button
+                onClick={completeModule}
+                disabled={completing}
+                className="px-8 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg"
+              >
+                {completing ? "Completing..." : "🎯 Finish Module"}
+              </button>
+            ) : (
+              <button
+                onClick={nextSlide}
+                disabled={currentSlide === slides.length - 1}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                Next →
+              </button>
+            )}
           </div>
         </div>
 
         {/* Quiz */}
-        {module.quizzes?.map((q, i) => (
+        {module?.quizzes?.map((q, i) => (
           <QuizCard key={q.id} quiz={q} index={i} />
         ))}
 
