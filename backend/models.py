@@ -5,7 +5,7 @@ from extensions import db
 class User(db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -39,7 +39,7 @@ class User(db.Model):
 class LearningModule(db.Model):
     __tablename__ = "learning_modules"
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
     difficulty = db.Column(db.String(50), default="beginner")
@@ -68,8 +68,8 @@ class LearningModule(db.Model):
 class QuizQuestion(db.Model):
     __tablename__ = "quiz_questions"
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    module_id = db.Column(db.BigInteger, db.ForeignKey("learning_modules.id"), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    module_id = db.Column(db.Integer, db.ForeignKey("learning_modules.id"), nullable=False)
     question = db.Column(db.Text, nullable=False)
     option_a = db.Column(db.String(255), nullable=False)
     option_b = db.Column(db.String(255), nullable=False)
@@ -100,9 +100,9 @@ class QuizQuestion(db.Model):
 class QuizAttempt(db.Model):
     __tablename__ = "quiz_attempts"
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey("users.id"), nullable=False)
-    module_id = db.Column(db.BigInteger, db.ForeignKey("learning_modules.id"), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    module_id = db.Column(db.Integer, db.ForeignKey("learning_modules.id"), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     attempted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -123,7 +123,7 @@ class QuizAttempt(db.Model):
 class EcoChallenge(db.Model):
     __tablename__ = "eco_challenges"
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
     instructions = db.Column(db.Text, nullable=False)
@@ -153,9 +153,9 @@ class EcoChallenge(db.Model):
 class ChallengeSubmission(db.Model):
     __tablename__ = "challenge_submissions"
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey("users.id"), nullable=False)
-    challenge_id = db.Column(db.BigInteger, db.ForeignKey("eco_challenges.id"), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey("eco_challenges.id"), nullable=False)
     proof_url = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(20), default="pending")  # pending / approved / rejected
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -181,7 +181,7 @@ class ChallengeSubmission(db.Model):
 class Badge(db.Model):
     __tablename__ = "badges"
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     required_points = db.Column(db.Integer, nullable=False)
@@ -206,9 +206,9 @@ class Badge(db.Model):
 class UserBadge(db.Model):
     __tablename__ = "user_badges"
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey("users.id"), nullable=False)
-    badge_id = db.Column(db.BigInteger, db.ForeignKey("badges.id"), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"), nullable=False)
     earned_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

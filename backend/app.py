@@ -33,9 +33,10 @@ def create_app():
 
     # Core configuration
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "eco-learn-secret")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL", "sqlite:///ecolearn.db"
-    )
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError("DATABASE_URL is not set in .env — Supabase connection required.")
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "eco-learn-jwt-secret")
     app.config["UPLOAD_FOLDER"] = "uploads/challenge_proofs"
@@ -170,7 +171,9 @@ def create_app():
 
     @app.errorhandler(500)
     def internal_error(error):
-        return jsonify({"error": "Internal server error"}), 500
+        import traceback
+        tb = traceback.format_exc()
+        return jsonify({"error": "Internal server error", "traceback": tb}), 500
 
     return app
 
