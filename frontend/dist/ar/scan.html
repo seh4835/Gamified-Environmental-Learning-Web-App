@@ -1,359 +1,909 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>EcoLearn AR Scanner</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>EcoLearn AR — Eco Scanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Load scripts statically with correct CDN URLs -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
+  <!-- TensorFlow.js + MobileNet for real-time object recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+  <!-- OpenCV.js for image preprocessing -->
+  <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onCvReady()" onerror="onCvReady()"></script>
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <style>
+    :root {
+      --green: #00ff88;
+      --purple: #a855f7;
+      --blue: #38bdf8;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --orange: #fb923c;
+      --font-hd: 'Orbitron', monospace;
+      --font-body: 'Inter', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: var(--font-body); }
 
-        html, body {
-            width: 100%; height: 100%;
-            overflow: hidden;
-            background: #000;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+    /* ── Camera ─────────────────────────────────────────────── */
+    #video {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    #ar-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 1; pointer-events: none;
+    }
+    #process-canvas { display: none; }
 
-        /* AR.js renders the camera feed TO the canvas — keep it full-screen */
-        a-scene {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 0 !important;
-        }
+    /* ── HUD shell ───────────────────────────────────────────── */
+    #hud {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 20;
+    }
 
-        /* ── HUD ───────────────────────────────────────────── */
-        #hud {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 10;
-        }
+    /* ── Top-left info ───────────────────────────────────────── */
+    #info-box {
+      position: absolute;
+      top: env(safe-area-inset-top, 16px); left: 16px;
+      background: rgba(0,0,0,0.80);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(16px);
+      color: #fff; padding: 14px 18px;
+      border-radius: 18px; max-width: 240px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .logo-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4);opacity:.7} }
+    .logo h3 {
+      font-family: var(--font-hd); font-size: 10px;
+      letter-spacing: .1em; color: var(--green);
+    }
+    #status, #sub-status {
+      font-family: var(--font-hd); font-size: 9px;
+      padding: 5px 10px; border-radius: 8px;
+      letter-spacing: .05em; margin-top: 6px;
+    }
+    #sub-status { font-family: var(--font-body); font-size: 10px; color: #9ca3af; padding: 0; }
+    .st-loading { background: rgba(251,191,36,.14); color: #fbbf24; }
+    .st-ready   { background: rgba(0,255,136,.12);  color: var(--green); }
+    .st-scanning{ background: rgba(56,189,248,.14);  color: var(--blue); }
+    .st-found   { background: rgba(168,85,247,.16);  color: var(--purple); }
+    .st-error   { background: rgba(248,113,113,.14); color: var(--red); }
 
-        #info-box {
-            position: absolute;
-            top: 20px; left: 20px;
-            background: rgba(0,0,0,0.72);
-            border: 1px solid rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 16px;
-            max-width: 280px;
-        }
-        #info-box h3 {
-            font-size: 17px; font-weight: 700; margin-bottom: 4px;
-        }
-        #info-box p { font-size: 13px; color: #ccc; }
-        #status {
-            margin-top: 10px; font-size: 13px; font-weight: 600;
-            padding: 6px 10px; border-radius: 8px;
-        }
-        .st-loading { background: rgba(255,193,7,0.18); color: #ffc107; }
-        .st-success { background: rgba(76,175,80,0.18);  color: #4caf50; }
-        .st-error   { background: rgba(244,67,54,0.18);  color: #f44336; }
+    /* ── AI badge ────────────────────────────────────────────── */
+    #ai-badge {
+      position: absolute;
+      top: env(safe-area-inset-top, 16px); right: 72px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid rgba(168,85,247,.3);
+      backdrop-filter: blur(12px);
+      padding: 8px 14px; border-radius: 14px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    #ai-badge .ai-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    #ai-badge span {
+      font-family: var(--font-hd); font-size: 8px;
+      color: var(--purple); letter-spacing: .1em;
+    }
 
-        /* Viewfinder */
-        #viewfinder {
-            position: absolute;
-            inset: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .frame {
-            width: min(60vw, 250px);
-            height: min(60vw, 250px);
-            position: relative;
-        }
-        .corner {
-            position: absolute;
-            width: 30px; height: 30px;
-            border-color: #4caf50; border-style: solid; border-width: 0;
-        }
-        .tl { top:0; left:0;  border-top-width:3px;    border-left-width:3px;  border-top-left-radius:4px; }
-        .tr { top:0; right:0; border-top-width:3px;    border-right-width:3px; border-top-right-radius:4px; }
-        .bl { bottom:0; left:0;  border-bottom-width:3px; border-left-width:3px;  border-bottom-left-radius:4px; }
-        .br { bottom:0; right:0; border-bottom-width:3px; border-right-width:3px; border-bottom-right-radius:4px; }
-        .scan-line {
-            position: absolute; left:0; right:0; height:2px;
-            background: linear-gradient(90deg, transparent, #4caf50, transparent);
-            animation: scan 2.4s ease-in-out infinite;
-        }
-        @keyframes scan { 0%{top:0} 50%{top:100%} 100%{top:0} }
+    /* ── Back button ─────────────────────────────────────────── */
+    #back-btn {
+      position: absolute;
+      top: env(safe-area-inset-top, 16px); right: 16px;
+      pointer-events: all;
+      padding: 9px 20px;
+      background: rgba(0,0,0,0.68);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      color: #fff; border-radius: 25px;
+      font-family: var(--font-hd); font-size: 9px;
+      letter-spacing: .08em; cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    #back-btn:hover  { background: rgba(255,255,255,.16); transform: scale(1.04); }
+    #back-btn:active { transform: scale(.95); }
 
-        /* Back button */
-        #back-btn {
-            position: absolute;
-            top: 20px; right: 20px;
-            pointer-events: all;
-            padding: 10px 22px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.22);
-            backdrop-filter: blur(10px);
-            color: #fff; border-radius: 25px;
-            font-size: 14px; font-weight: 600; cursor: pointer;
-            transition: background 0.2s, transform 0.15s;
-        }
-        #back-btn:hover  { background: rgba(255,255,255,0.22); transform: scale(1.04); }
-        #back-btn:active { transform: scale(0.96); }
+    /* ── Central viewfinder ─────────────────────────────────── */
+    #viewfinder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vf-wrap { position: relative; }
+    .vf-ring {
+      width: min(60vw,260px); height: min(60vw,260px);
+      border-radius: 50%;
+      border: 2px solid rgba(0,255,136,.35);
+      box-shadow: 0 0 0 6px rgba(0,255,136,.06),
+                  inset 0 0 30px rgba(0,255,136,.04);
+      animation: ringPulse 3s ease-in-out infinite;
+      position: relative;
+    }
+    .vf-ring.scanning { border-color: var(--blue); box-shadow: 0 0 0 6px rgba(56,189,248,.1), inset 0 0 30px rgba(56,189,248,.06); animation: ringPulse 1s ease-in-out infinite; }
+    .vf-ring.found    { border-color: var(--purple); box-shadow: 0 0 0 6px rgba(168,85,247,.12), inset 0 0 30px rgba(168,85,247,.08); animation: none; }
+    @keyframes ringPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
 
-        /* ── Full-screen overlay (permission / error) ─────── */
-        #overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(10,20,10,0.96);
-            z-index: 200;
-            flex-direction: column; align-items: center; justify-content: center;
-            color: #fff; text-align: center; padding: 36px;
-        }
-        #overlay.show { display: flex; }
-        #overlay .ov-icon { font-size: 70px; margin-bottom: 24px; }
-        #overlay h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-        #overlay p  { font-size: 15px; color: #bbb; line-height: 1.65; max-width: 360px; margin-bottom: 30px; }
-        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .btn {
-            padding: 13px 30px; border: none; border-radius: 25px;
-            font-size: 15px; font-weight: 700; cursor: pointer;
-            transition: transform 0.15s, opacity 0.15s;
-        }
-        .btn:hover { opacity: 0.88; transform: scale(1.04); }
-        .btn-green { background: linear-gradient(135deg,#43a047,#66bb6a); color:#fff; }
-        .btn-gray  { background: rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); }
+    .vf-crosshair {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vf-crosshair::before,
+    .vf-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(0,255,136,.4);
+    }
+    .vf-crosshair::before { width: 1px; height: 40%; }
+    .vf-crosshair::after  { width: 40%; height: 1px; }
 
-        /* Marker popup toast */
-        #marker-toast {
-            display: none;
-            position: absolute;
-            bottom: 48px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg,#1b5e20,#2e7d32);
-            color: #fff; border-radius: 16px;
-            padding: 16px 28px; text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            min-width: 240px; font-size: 15px;
-        }
-        #marker-toast.show { display: block; }
-        #marker-toast strong { display: block; font-size: 18px; margin-bottom: 4px; }
-    </style>
+    .vf-label {
+      position: absolute; bottom: -36px; left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-hd); font-size: 8px;
+      color: rgba(0,255,136,.6); letter-spacing: .14em;
+      white-space: nowrap; text-align: center;
+    }
+    .scan-arc {
+      position: absolute; inset: -4px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--green);
+      animation: spinArc 1.8s linear infinite;
+    }
+    @keyframes spinArc { to{ transform: rotate(360deg); } }
+
+    /* ── Bottom eco result panel ─────────────────────────────── */
+    #eco-panel {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      transform: translateY(100%);
+      transition: transform .45s cubic-bezier(.16,1,.3,1);
+      z-index: 30; pointer-events: all;
+    }
+    #eco-panel.visible { transform: translateY(0); }
+
+    .ep-inner {
+      background: rgba(5,5,7,0.96);
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(24px);
+      padding: 20px 20px env(safe-area-inset-bottom,20px);
+    }
+
+    /* drag handle */
+    .ep-handle {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,.15);
+      margin: 0 auto 18px;
+    }
+
+    /* object detected row */
+    .ep-obj-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 16px;
+    }
+    .ep-obj-icon {
+      width: 52px; height: 52px; flex-shrink: 0;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      background: var(--eco-bg, rgba(0,255,136,.1));
+      border: 1px solid var(--eco-border, rgba(0,255,136,.2));
+    }
+    .ep-obj-name {
+      font-size: 18px; font-weight: 700; color: #f1f5f9;
+      text-transform: capitalize; line-height: 1.2;
+    }
+    .ep-obj-cat {
+      font-family: var(--font-hd); font-size: 8px;
+      letter-spacing: .1em; color: var(--eco-color, #00ff88);
+      margin-top: 3px;
+    }
+    .ep-conf {
+      margin-left: auto;
+      font-family: var(--font-hd); font-size: 10px;
+      color: #6b7280; text-align: right;
+    }
+    .ep-conf span { display: block; font-size: 18px; font-weight: 700; color: #f1f5f9; }
+
+    /* ── Eco Score meter ─────────────────────────────────────── */
+    .ep-score-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 14px;
+    }
+    .ep-score-label {
+      font-family: var(--font-hd); font-size: 8px;
+      letter-spacing: .1em; color: #6b7280; min-width: 70px;
+    }
+    .ep-score-bar {
+      flex: 1; height: 8px; border-radius: 4px;
+      background: rgba(255,255,255,.07); overflow: hidden;
+    }
+    .ep-score-fill {
+      height: 100%; border-radius: 4px;
+      background: var(--eco-color, #00ff88);
+      box-shadow: 0 0 8px var(--eco-color, #00ff88);
+      transition: width 1s cubic-bezier(.16,1,.3,1);
+      width: 0%;
+    }
+    .ep-score-val {
+      font-family: var(--font-hd); font-size: 11px;
+      font-weight: 700; color: var(--eco-color, #00ff88);
+      min-width: 34px; text-align: right;
+    }
+
+    /* ── Stats row ───────────────────────────────────────────── */
+    .ep-stats {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 8px; margin-bottom: 14px;
+    }
+    .ep-stat {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: 10px 12px; text-align: center;
+    }
+    .ep-stat-icon { font-size: 16px; margin-bottom: 4px; }
+    .ep-stat-val {
+      font-family: var(--font-hd); font-size: 13px;
+      font-weight: 700; color: #f1f5f9; line-height: 1;
+    }
+    .ep-stat-lbl {
+      font-size: 9px; color: #6b7280; margin-top: 3px;
+    }
+
+    /* ── Eco facts ───────────────────────────────────────────── */
+    .ep-facts-head {
+      font-family: var(--font-hd); font-size: 8px;
+      letter-spacing: .12em; color: #4b5563; margin-bottom: 8px;
+    }
+    .ep-facts {
+      display: flex; flex-direction: column; gap: 7px;
+      margin-bottom: 16px;
+    }
+    .ep-fact {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-left: 2px solid var(--eco-color, #00ff88);
+      border-radius: 0 10px 10px 0;
+      padding: 9px 12px;
+      font-size: 11px; color: #9ca3af; line-height: 1.5;
+    }
+    .ep-fact .fact-icon { flex-shrink: 0; font-size: 14px; }
+
+    /* ── Action button ───────────────────────────────────────── */
+    .ep-actions { display: flex; gap: 10px; }
+    .ep-btn {
+      flex: 1; padding: 13px; border: none; border-radius: 14px;
+      font-family: var(--font-hd); font-size: 9px;
+      font-weight: 700; letter-spacing: .08em;
+      cursor: pointer; transition: all .2s;
+    }
+    .ep-btn-primary {
+      background: linear-gradient(135deg, var(--eco-color, #00c96b), var(--eco-color-dim, #00ff88));
+      color: #000;
+    }
+    .ep-btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .ep-btn-secondary {
+      background: rgba(255,255,255,.07); color: #9ca3af;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .ep-btn-secondary:hover { background: rgba(255,255,255,.11); }
+
+    /* ── Permission overlay ──────────────────────────────────── */
+    #perm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,4,2,.97);
+      z-index: 200;
+      flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; text-align: center; padding: 40px;
+    }
+    #perm-overlay.show { display: flex; animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .pov-icon  { font-size: 70px; margin-bottom: 20px; }
+    .pov-title { font-family: var(--font-hd); font-size: 20px; font-weight: 700; color: var(--green); letter-spacing: .06em; margin-bottom: 10px; }
+    .pov-msg   { font-size: 14px; color: #9ca3af; line-height: 1.7; max-width: 340px; margin-bottom: 28px; }
+    .btn-row   { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .pov-btn   { padding: 13px 32px; border: none; border-radius: 28px; font-family: var(--font-hd); font-size: 10px; font-weight: 700; letter-spacing: .08em; cursor: pointer; transition: transform .15s, opacity .15s; }
+    .pov-btn:hover { opacity: .88; transform: scale(1.04); }
+    .pov-btn-green { background: linear-gradient(135deg, #00c96b, #00ff88); color: #000; }
+    .pov-btn-gray  { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.18); }
+
+    /* ── Scan flash ──────────────────────────────────────────── */
+    #scan-flash {
+      position: fixed; inset: 0;
+      opacity: 0; pointer-events: none; z-index: 150;
+      transition: opacity .08s ease-out;
+    }
+    #scan-flash.flash { opacity: .22; }
+
+    /* ── Loading overlay ─────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0; z-index: 180;
+      background: rgba(0,4,2,.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+    }
+    #loading-overlay.hide { display: none; }
+    .lo-icon { font-size: 64px; animation: bounce 1.2s ease-in-out infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .lo-title { font-family: var(--font-hd); font-size: 15px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .lo-msg   { font-size: 12px; color: #6b7280; text-align: center; max-width: 280px; line-height: 1.6; }
+    .lo-bar   { width: 220px; height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
+    .lo-fill  { height: 100%; background: linear-gradient(90deg, var(--green), var(--blue)); border-radius: 2px; animation: loadFill 3.5s ease forwards; }
+    @keyframes loadFill { 0%{width:0%} 70%{width:75%} 90%{width:88%} }
+    .lo-step  { font-family: var(--font-hd); font-size: 8px; color: #374151; letter-spacing: .1em; }
+  </style>
 </head>
 <body>
 
-<!-- The a-scene IS the camera feed — AR.js renders video to its WebGL canvas -->
-<a-scene
-    id="ar-scene"
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-    vr-mode-ui="enabled: false"
-    renderer="antialias: true; alpha: false; logarithmicDepthBuffer: true;"
-    style="display:none;"
->
-    <a-camera position="0 0 0"></a-camera>
+<video id="video" playsinline autoplay muted></video>
+<canvas id="ar-canvas"></canvas>
+<canvas id="process-canvas"></canvas>
+<div id="scan-flash"></div>
 
-    <!-- Hiro marker -->
-    <a-marker id="m-hiro" preset="hiro" emitevents="true">
-        <a-box position="0 0.5 0" scale="0.8 0.8 0.8" color="#FF6B6B">
-            <a-animation attribute="rotation" to="0 360 0" dur="2000" repeat="indefinite"></a-animation>
-        </a-box>
-        <a-text value="Climate Change Module" position="0 1.5 0" align="center" scale="0.6 0.6 0.6" color="#fff"></a-text>
-    </a-marker>
-
-    <!-- Kanji marker -->
-    <a-marker id="m-kanji" preset="kanji" emitevents="true">
-        <a-cylinder position="0 0.6 0" radius="0.4" height="1.2" color="#4CAF50">
-            <a-animation attribute="rotation" to="0 360 0" dur="3000" repeat="indefinite"></a-animation>
-        </a-cylinder>
-        <a-text value="Eco Challenge Unlocked!" position="0 2 0" align="center" scale="0.6 0.6 0.6" color="#fff"></a-text>
-    </a-marker>
-
-    <!-- Barcode marker 0 -->
-    <a-marker id="m-barcode" type="barcode" value="0" emitevents="true">
-        <a-sphere position="0 0.6 0" radius="0.45" color="#2196F3">
-            <a-animation attribute="scale" to="1.3 1.3 1.3" dur="1000" repeat="indefinite" direction="alternate"></a-animation>
-        </a-sphere>
-        <a-text value="Renewable Energy Module" position="0 1.8 0" align="center" scale="0.6 0.6 0.6" color="#fff"></a-text>
-    </a-marker>
-</a-scene>
-
-<!-- HUD (always on top) -->
-<div id="hud">
-    <div id="info-box">
-        <h3>🌿 EcoLearn AR Scanner</h3>
-        <p>Point your camera at an AR marker</p>
-        <div id="status" class="status st-loading">🔄 Waiting for camera…</div>
-    </div>
-
-    <div id="viewfinder">
-        <div class="frame">
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-            <div class="scan-line"></div>
-        </div>
-    </div>
-
-    <button id="back-btn" onclick="goBack()">← Back</button>
-
-    <div id="marker-toast">
-        <strong id="toast-title">Marker Found!</strong>
-        <span id="toast-msg">Hold your camera steady</span>
-    </div>
+<!-- Loading overlay while TF model loads -->
+<div id="loading-overlay">
+  <div class="lo-icon">🌿</div>
+  <div class="lo-title">ECOLEARN AI</div>
+  <p class="lo-msg">Loading AI vision model for real-time object sustainability analysis…</p>
+  <div class="lo-bar"><div class="lo-fill"></div></div>
+  <div class="lo-step" id="lo-step">INITIALISING TENSORFLOW.JS…</div>
 </div>
 
-<!-- Permission / Error overlay -->
-<div id="overlay" class="show">
-    <div class="ov-icon" id="ov-icon">📷</div>
-    <h2 id="ov-title">Camera Access Required</h2>
-    <p id="ov-msg">EcoLearn AR Scanner needs your camera to detect eco-markers and show interactive content. Please allow camera access.</p>
-    <div class="btn-row">
-        <button class="btn btn-green" id="ov-action" onclick="requestCamera()">Allow Camera</button>
-        <button class="btn btn-gray"  onclick="goBack()">Cancel</button>
+<!-- Permission overlay -->
+<div id="perm-overlay" class="show">
+  <div class="pov-icon" id="pov-icon">📷</div>
+  <div class="pov-title" id="pov-title">CAMERA REQUIRED</div>
+  <p class="pov-msg" id="pov-msg">EcoLearn AI Scanner uses your camera to identify objects and analyse their environmental sustainability in real time.</p>
+  <div class="btn-row">
+    <button class="pov-btn pov-btn-green" id="pov-action" onclick="requestCamera()">ALLOW CAMERA</button>
+    <button class="pov-btn pov-btn-gray"  onclick="goBack()">Cancel</button>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="info-box">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <h3>ECOLEARN AI</h3>
     </div>
+    <div id="status" class="st-loading">⏳ Loading AI model…</div>
+    <div id="sub-status">Point camera at any object</div>
+  </div>
+
+  <div id="ai-badge">
+    <div class="ai-dot"></div>
+    <span>AI VISION ACTIVE</span>
+  </div>
+
+  <button id="back-btn" onclick="goBack()">← BACK</button>
+
+  <!-- Viewfinder ring -->
+  <div id="viewfinder">
+    <div class="vf-wrap">
+      <div class="vf-ring" id="vf-ring">
+        <div class="vf-crosshair"></div>
+        <div class="scan-arc" id="scan-arc"></div>
+      </div>
+      <div class="vf-label" id="vf-label">POINT AT ANY OBJECT</div>
+    </div>
+  </div>
+</div>
+
+<!-- Eco result panel -->
+<div id="eco-panel">
+  <div class="ep-inner">
+    <div class="ep-handle"></div>
+
+    <div class="ep-obj-row">
+      <div class="ep-obj-icon" id="ep-icon">🌱</div>
+      <div>
+        <div class="ep-obj-name" id="ep-name">Object</div>
+        <div class="ep-obj-cat" id="ep-cat">ENVIRONMENT CATEGORY</div>
+      </div>
+      <div class="ep-conf">
+        <span id="ep-conf-val">87%</span>
+        CONFIDENCE
+      </div>
+    </div>
+
+    <!-- Eco Score -->
+    <div class="ep-score-row">
+      <div class="ep-score-label">ECO SCORE</div>
+      <div class="ep-score-bar"><div class="ep-score-fill" id="ep-score-fill"></div></div>
+      <div class="ep-score-val" id="ep-score-val">0/10</div>
+    </div>
+
+    <!-- Sustainability -->
+    <div class="ep-score-row">
+      <div class="ep-score-label">SUSTAINABILITY</div>
+      <div class="ep-score-bar"><div class="ep-score-fill" id="ep-sustain-fill" style="background:#38bdf8;box-shadow:0 0 8px #38bdf8"></div></div>
+      <div class="ep-score-val" id="ep-sustain-val" style="color:#38bdf8">0%</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="ep-stats">
+      <div class="ep-stat">
+        <div class="ep-stat-icon">🌡️</div>
+        <div class="ep-stat-val" id="ep-carbon">—</div>
+        <div class="ep-stat-lbl">CO₂ kg/yr</div>
+      </div>
+      <div class="ep-stat">
+        <div class="ep-stat-icon">♻️</div>
+        <div class="ep-stat-val" id="ep-recycle">—</div>
+        <div class="ep-stat-lbl">Recyclable</div>
+      </div>
+      <div class="ep-stat">
+        <div class="ep-stat-icon">⚡</div>
+        <div class="ep-stat-val" id="ep-energy">—</div>
+        <div class="ep-stat-lbl">Energy Use</div>
+      </div>
+    </div>
+
+    <!-- Eco facts -->
+    <div class="ep-facts-head">🌍 ECO FACTS &amp; TIPS</div>
+    <div class="ep-facts" id="ep-facts"></div>
+
+    <div class="ep-actions">
+      <button class="ep-btn ep-btn-primary"   id="ep-challenge-btn" onclick="goToChallenge()">VIEW CHALLENGE</button>
+      <button class="ep-btn ep-btn-secondary" onclick="dismissPanel()">SCAN AGAIN</button>
+    </div>
+  </div>
 </div>
 
 <script>
-    const statusEl  = document.getElementById('status');
-    const overlay   = document.getElementById('overlay');
-    const arScene   = document.getElementById('ar-scene');
-    const toast     = document.getElementById('marker-toast');
-    let toastTimer  = null;
+// ═══════════════════════════════════════════════════════════
+// ECO SUSTAINABILITY DATABASE
+// Maps MobileNet class keywords → eco profile
+// ═══════════════════════════════════════════════════════════
+const ECO_DB = [
+  // ── Sustainable / Green ──────────────────────────────────
+  { keywords:['bicycle','bike','mountain bike','road bike'], icon:'🚲', name:'Bicycle', cat:'SUSTAINABLE TRANSPORT', ecoScore:9.5, sustainPct:95, carbon:0, recycle:'Yes', energy:'Very Low', color:'#00ff88', colorDim:'#00c96b', bg:'rgba(0,255,136,.1)', border:'rgba(0,255,136,.2)', module:'Urban Sustainability', facts:['Zero carbon emissions — 100% human-powered transport.','Manufacturing a bicycle emits ~96 kg CO₂ vs ~6,000 kg for a car.','Cycling for 10 km/day saves ~1.3 tonnes of CO₂ per year.','Bikes can last 20–30 years with basic maintenance.'] },
+  { keywords:['solar panel','solar cell','photovoltaic'], icon:'☀️', name:'Solar Panel', cat:'RENEWABLE ENERGY', ecoScore:9.8, sustainPct:98, carbon:-50, recycle:'Partial', energy:'Zero (Output)', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Renewable Energy', facts:['A single panel generates ~300W, saving ~1 tonne of CO₂ per year.','Solar panels last 25–30 years with minimal maintenance.','The energy payback period is just 1–3 years.','Solar + storage can power a home 24/7 with zero emissions.'] },
+  { keywords:['plant','flower','tree','leaf','potted','herb','grass'], icon:'🌿', name:'Plant', cat:'BIODIVERSITY', ecoScore:10, sustainPct:100, carbon:-22, recycle:'Natural', energy:'None', color:'#34d399', colorDim:'#10b981', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.2)', module:'Biodiversity', facts:['A single tree absorbs ~22 kg of CO₂ per year.','House plants remove up to 87% of air toxins in 24 hours.','Plants support pollinators — vital for 75% of our food supply.','Urban green spaces reduce city temperatures by up to 5°C.'] },
+  { keywords:['canteen','water bottle','reusable bottle','thermos'], icon:'🫙', name:'Reusable Bottle', cat:'WASTE REDUCTION', ecoScore:8.5, sustainPct:85, carbon:0.5, recycle:'Yes', energy:'Low', color:'#38bdf8', colorDim:'#0ea5e9', bg:'rgba(56,189,248,.1)', border:'rgba(56,189,248,.2)', module:'Water Conservation', facts:['Replaces ~150 single-use plastic bottles per year per person.','Saves 83 g of plastic waste entering landfill each use.','Steel/glass bottles last 10+ years unlike plastic counterparts.','Reducing plastic use prevents microplastics in your drinking water.'] },
+  { keywords:['compost','compost bin','organic'], icon:'🌱', name:'Compost', cat:'WASTE MANAGEMENT', ecoScore:9.0, sustainPct:90, carbon:-0.3, recycle:'100% Natural', energy:'None', color:'#34d399', colorDim:'#10b981', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.2)', module:'Waste Management', facts:['Composting diverts 30% of household waste from landfills.','Compost enriches soil, reducing need for chemical fertilisers.','Landfill food waste emits methane — 25× more potent than CO₂.','Home composting saves ~100 kg of CO₂ equivalent per year.'] },
 
-    function setStatus(msg, cls) {
-        statusEl.textContent  = msg;
-        statusEl.className    = 'status ' + cls;
+  // ── Moderate ─────────────────────────────────────────────
+  { keywords:['laptop','notebook computer','computer'], icon:'💻', name:'Laptop', cat:'ELECTRONIC DEVICE', ecoScore:4.5, sustainPct:45, carbon:300, recycle:'Partial', energy:'Medium', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Carbon Footprint', facts:['Manufacturing a laptop emits ~300 kg of CO₂.','Using a laptop for 8h/day for a year costs ~22 kg CO₂.','Only 20% of e-waste is formally recycled globally.','Keeping your laptop for an extra 2 years halves its carbon impact.'] },
+  { keywords:['book','textbook','paperback','novel','magazine'], icon:'📚', name:'Book / Paper', cat:'PAPER PRODUCT', ecoScore:5.5, sustainPct:55, carbon:4, recycle:'Yes (100%)', energy:'Low', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Sustainable Agriculture', facts:['Recycling 1 tonne of paper saves 17 trees and 4,000 kWh of energy.','The publishing industry produces ~16 million tonnes of CO₂/year.','Digital reading reduces paper carbon footprint by ~95%.','Choose books from FSC-certified publishers to protect forests.'] },
+  { keywords:['shopping bag','tote','cloth bag'], icon:'🛍️', name:'Cloth Bag', cat:'REUSABLE ITEM', ecoScore:7.5, sustainPct:75, carbon:2, recycle:'Yes', energy:'Low', color:'#00ff88', colorDim:'#00c96b', bg:'rgba(0,255,136,.1)', border:'rgba(0,255,136,.2)', module:'Waste Management', facts:['A cotton bag must be reused 173× to be better than plastic.','Replaces 300–700 single-use plastic bags per year.','Single-use plastic bags take 500+ years to decompose.','Natural fibre bags biodegrade within a few months.'] },
+  { keywords:['food','fruit','vegetable','bread','apple','banana','orange','vegetable'], icon:'🥦', name:'Food / Produce', cat:'FOOD SYSTEMS', ecoScore:7.0, sustainPct:70, carbon:2, recycle:'Compostable', energy:'Low', color:'#34d399', colorDim:'#10b981', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.2)', module:'Sustainable Agriculture', facts:['Fruits & vegetables have the lowest carbon footprint of all foods.','Buying local food reduces food-mile emissions by up to 80%.','1/3 of all food produced globally is wasted every year.','A plant-based diet reduces food carbon footprint by 50%.'] },
+  { keywords:['electric fan','fan'], icon:'🌀', name:'Electric Fan', cat:'HOME APPLIANCE', ecoScore:5.0, sustainPct:50, carbon:18, recycle:'Partial', energy:'Low-Medium', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Carbon Footprint', facts:['A ceiling fan uses 15–75 W vs 1,000–3,500 W for air conditioning.','Using fans instead of AC saves ~200 kg of CO₂ per summer.','Fans cool people, not rooms — turn off when leaving.','Energy Star fans are 20% more efficient than standard models.'] },
+  { keywords:['bulb','light bulb','lamp','light'], icon:'💡', name:'Light Bulb', cat:'ENERGY EFFICIENCY', ecoScore:6.5, sustainPct:65, carbon:10, recycle:'Yes (LED)', energy:'Very Low (LED)', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Renewable Energy', facts:['LED bulbs use 75% less energy than incandescent ones.','Switching to LEDs saves ~$225 in energy costs over 5 years.','LED bulbs last 25× longer than traditional bulbs.','Replacing 1 incandescent with LED saves 150 kg of CO₂ over its life.'] },
+  { keywords:['bus','coach'], icon:'🚌', name:'Bus / Public Transport', cat:'SUSTAINABLE TRANSPORT', ecoScore:7.5, sustainPct:75, carbon:89, recycle:'N/A', energy:'Medium', color:'#00ff88', colorDim:'#00c96b', bg:'rgba(0,255,136,.1)', border:'rgba(0,255,136,.2)', module:'Urban Sustainability', facts:['A bus emits 89 g CO₂/km vs 192 g for a single-occupancy car.','Public transport can carry up to 2,000 passengers per lane per hour.','Replacing one car journey per week saves 500 kg CO₂/year.','Electric buses emit up to 76% less carbon than diesel alternatives.'] },
+  // ── Electronics / Gadgets ────────────────────────────────
+  { keywords:['cellular telephone','mobile phone','smartphone','cell phone','iphone','android','handset','flip phone','hand-held computer'], icon:'📱', name:'Smartphone', cat:'ELECTRONIC DEVICE', ecoScore:3.5, sustainPct:35, carbon:70, recycle:'Partial', energy:'Low-Medium', color:'#fb923c', colorDim:'#ea580c', bg:'rgba(251,146,60,.1)', border:'rgba(251,146,60,.2)', module:'Carbon Footprint', facts:['Manufacturing a smartphone emits ~70 kg of CO₂ — most of its lifetime impact.','Only 1% of smartphones are recycled at end-of-life globally.','Keeping your phone 1 extra year reduces its carbon footprint by 33%.','Rare earth mining for phone components destroys ecosystems.'] },
+  { keywords:['television','tv','monitor','screen','display','desktop computer','computer keyboard','mouse'], icon:'🖥️', name:'Screen / TV', cat:'ELECTRONIC DEVICE', ecoScore:3.8, sustainPct:38, carbon:400, recycle:'Partial', energy:'High', color:'#fb923c', colorDim:'#ea580c', bg:'rgba(251,146,60,.1)', border:'rgba(251,146,60,.2)', module:'Carbon Footprint', facts:['A large TV can use up to 400 kWh of electricity per year.','E-waste is the fastest-growing waste stream globally.','Enabling eco/energy-saving mode reduces screen power use by 30%.','Recycling a monitor recovers lead, glass and precious metals.'] },
+  { keywords:['refrigerator','fridge','washing machine','dishwasher','microwave','oven'], icon:'🧊', name:'Home Appliance', cat:'ENERGY CONSUMER', ecoScore:4.0, sustainPct:40, carbon:200, recycle:'Yes (metal)', energy:'Medium-High', color:'#fbbf24', colorDim:'#d97706', bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.2)', module:'Carbon Footprint', facts:['Refrigerators account for about 14% of household electricity use.','A-rated appliances use up to 60% less energy than older models.','Full loads in washing machines save ~32 kg CO₂/year vs half loads.','Modern heat-pump dryers use 50% less energy than traditional ones.'] },
+
+  // ── Low Sustainability ────────────────────────────────────
+  { keywords:['plastic bottle','bottle','water bottle'], icon:'🧴', name:'Plastic Bottle', cat:'SINGLE-USE PLASTIC', ecoScore:1.5, sustainPct:15, carbon:3.4, recycle:'Partial', energy:'High (to produce)', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Waste Management', facts:['Only 9% of all plastic ever produced has been recycled.','A plastic bottle takes up to 450 years to decompose.','8 million tonnes of plastic enter our oceans every year.','Switching to a reusable bottle prevents 156 bottles/year from landfill.'] },
+  { keywords:['car','automobile','sports car','vehicle','sedan'], icon:'🚗', name:'Car (Petrol/Diesel)', cat:'HIGH-EMISSION TRANSPORT', ecoScore:1.8, sustainPct:18, carbon:4600, recycle:'30% parts', energy:'Very High', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Carbon Footprint', facts:['An average car emits 4.6 tonnes of CO₂ per year.','Manufacturing a car produces ~6 tonnes of CO₂.','Cars sit idle 95% of their lifetime.','Switching to an EV cuts driving emissions by up to 70%.'] },
+  { keywords:['cigarette','cigar','tobacco'], icon:'🚬', name:'Cigarette', cat:'HARMFUL PRODUCT', ecoScore:0.5, sustainPct:5, carbon:0.9, recycle:'No', energy:'High', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Waste Management', facts:['Cigarette butts are the most littered item on Earth — 4.5 trillion/year.','They leach toxic chemicals (arsenic, lead, nicotine) into waterways.','Tobacco farming destroys 600 million trees per year.','One cigarette produces 14 g of CO₂ equivalent.'] },
+  { keywords:['hamburger','burger','hot dog','meat','steak'], icon:'🍔', name:'Meat / Burger', cat:'HIGH-IMPACT FOOD', ecoScore:2.0, sustainPct:20, carbon:27, recycle:'Compostable', energy:'Very High', color:'#fb923c', colorDim:'#ea580c', bg:'rgba(251,146,60,.1)', border:'rgba(251,146,60,.2)', module:'Sustainable Agriculture', facts:['Beef produces 27 kg CO₂ equivalent per kg of protein.','Livestock farming uses 70% of agricultural land globally.','Switching to a plant-based burger reduces CO₂ by 89%.','Meat production uses 8× more water than growing vegetables.'] },
+  { keywords:['airplane','aircraft','jet'], icon:'✈️', name:'Airplane', cat:'HIGH-EMISSION TRANSPORT', ecoScore:1.5, sustainPct:15, carbon:255, recycle:'Partial', energy:'Extremely High', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Carbon Footprint', facts:['Flying generates 255 g of CO₂ per km per passenger.','Aviation accounts for 2.5% of global CO₂ emissions.','One transatlantic flight emits ~1.5 tonnes of CO₂.','Train travel emits 90% less CO₂ than flying for same route.'] },
+  { keywords:['plastic bag','grocery bag','polythene'], icon:'🛍️', name:'Plastic Bag', cat:'SINGLE-USE PLASTIC', ecoScore:1.0, sustainPct:10, carbon:1.6, recycle:'Rarely', energy:'Medium', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Waste Management', facts:['The average plastic bag is used for just 12 minutes.','They take 10–1,000 years to decompose in landfill.','Over 1 trillion plastic bags are used worldwide each year.','Marine animals mistake them for jellyfish, causing mass deaths.'] },
+  { keywords:['coal','charcoal'], icon:'🪨', name:'Coal', cat:'FOSSIL FUEL', ecoScore:0.2, sustainPct:2, carbon:2400, recycle:'No', energy:'Extremely High', color:'#f87171', colorDim:'#ef4444', bg:'rgba(248,113,113,.1)', border:'rgba(248,113,113,.2)', module:'Renewable Energy', facts:['Burning coal releases 2.4 kg CO₂ per kg — the dirtiest fossil fuel.','Coal combustion causes 800,000 premature deaths per year.','Renewable energy is now cheaper than coal in most countries.','Remaining coal reserves could push global temps above 3°C.'] },
+
+  // ── Default fallback ─────────────────────────────────────
+  { keywords:['__default__'], icon:'🔍', name:'Unknown Object', cat:'GENERAL OBJECT', ecoScore:5, sustainPct:50, carbon:10, recycle:'Varies', energy:'Medium', color:'#a855f7', colorDim:'#7c3aed', bg:'rgba(168,85,247,.1)', border:'rgba(168,85,247,.2)', module:'Environmental Policy', facts:['Every product has an environmental footprint — even small ones.','Ask: Can it be reused, repaired, or recycled before throwing away?','Choosing second-hand items reduces manufacturing emissions by 70%.','Learn about eco-labels (EU Ecolabel, Fair Trade) when shopping.'] }
+];
+
+// Lookup function: returns eco profile matching MobileNet prediction
+// Returns null if no confident match found in the eco database
+function lookupEco(predictions) {
+  // Filter out any human/face predictions before eco lookup
+  const safePreds = predictions.filter(pred => {
+    const cls = pred.className.toLowerCase();
+    return !BLOCKED_CLASSES.some(b => cls.includes(b));
+  });
+
+  for (const pred of safePreds) {
+    const cls = pred.className.toLowerCase();
+    for (const entry of ECO_DB) {
+      if (entry.keywords[0] === '__default__') continue;
+      if (entry.keywords.some(kw => cls.includes(kw) || kw.includes(cls.split(',')[0]))) {
+        return { ...entry, confidence: Math.round(pred.probability * 100) };
+      }
     }
+  }
 
-    function showToast(title, msg) {
-        document.getElementById('toast-title').textContent = title;
-        document.getElementById('toast-msg').textContent   = msg;
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
-    }
+  // No eco match found — return null to suppress the result panel
+  // (don't show random fallback names like 'birdhouse' or 'wardrobe')
+  return null;
+}
 
-    async function requestCamera() {
-        setStatus('🔄 Requesting camera…', 'st-loading');
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let model        = null;
+let cvReady      = false;
+let cameraActive = false;
+let rafId        = null;
+let classifyTimer= null;
+let panelShown   = false;
+let lastPredTime = 0;
+const INTERVAL   = 800; // ms between AI classifications
 
-        if (!navigator.mediaDevices?.getUserMedia) {
-            showError('😢', 'Not Supported', 'Your browser does not support camera access. Try Chrome or Edge.');
-            return;
-        }
+const videoEl      = document.getElementById('video');
+const arCanvas     = document.getElementById('ar-canvas');
+const processCanvas= document.getElementById('process-canvas');
+const arCtx        = arCanvas.getContext('2d');
+const procCtx      = processCanvas.getContext('2d');
 
-        try {
-            // Just request permission — let AR.js handle everything after
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: 'environment' } },
-                audio: false
-            });
-            // Stop our test stream — AR.js will open its own
-            stream.getTracks().forEach(t => t.stop());
-            launchAR();
-        } catch (err) {
-            console.error('Camera error:', err);
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                showError('🚫', 'Permission Denied',
-                    'Camera access was blocked. Click the camera icon in your browser address bar → Allow, then refresh the page.');
-            } else if (err.name === 'NotFoundError') {
-                showError('🔍', 'No Camera Found', 'No camera device was detected. Please connect a camera and reload.');
-            } else {
-                showError('⚠️', 'Camera Error', err.message || 'An unknown error occurred. Please try again.');
-            }
-        }
-    }
+// ═══════════════════════════════════════════════════════════
+// OPENCV / TF INIT
+// ═══════════════════════════════════════════════════════════
+function onCvReady() {
+  cvReady = true;
+  console.log('%c[EcoLearn AR] OpenCV ready ✓', 'color:#00ff88;font-weight:bold');
+}
 
-    function launchAR() {
-        overlay.classList.remove('show');
-        setStatus('🔄 Starting AR…', 'st-loading');
+async function initModels() {
+  try {
+    document.getElementById('lo-step').textContent = 'LOADING TENSORFLOW.JS…';
+    await tf.ready();
 
-        // Show the a-scene — AR.js takes over camera + renders to canvas
-        arScene.style.display = '';
+    document.getElementById('lo-step').textContent = 'DOWNLOADING MOBILENET V2…';
+    model = await mobilenet.load({ version: 2, alpha: 1.0 });
 
-        // Attach marker event listeners
-        ['m-hiro', 'm-kanji', 'm-barcode'].forEach(id => {
-            const marker = document.getElementById(id);
-            if (!marker) return;
+    console.log('%c[EcoLearn AR] MobileNet ready ✓', 'color:#00ff88;font-weight:bold');
+    document.getElementById('lo-step').textContent = 'AI MODEL READY ✓';
 
-            marker.addEventListener('markerFound', () => {
-                setStatus('🎯 Marker detected! Hold steady…', 'st-success');
-                const labels = {
-                    'm-hiro':    ['Climate Change Module', 'Eco tip: Reduce your carbon footprint!'],
-                    'm-kanji':   ['Eco Challenge Unlocked!', 'Complete this challenge for 20 points!'],
-                    'm-barcode': ['Renewable Energy Module', 'Learn about solar & wind energy!']
-                };
-                const [title, msg] = labels[id] || ['Marker Found!', 'Hold your camera steady'];
-                showToast(title, msg);
-            });
+    // Check camera permission
+    setTimeout(() => {
+      document.getElementById('loading-overlay').classList.add('hide');
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'camera' }).then(r => {
+          if (r.state === 'granted') requestCamera();
+          else permOverlay.classList.add('show');
+        }).catch(() => permOverlay.classList.add('show'));
+      } else {
+        permOverlay.classList.add('show');
+      }
+    }, 500);
+  } catch(e) {
+    console.error('[EcoLearn AR] Model load failed:', e);
+    document.getElementById('lo-step').textContent = 'MODEL LOAD FAILED — check internet connection';
+  }
+}
 
-            marker.addEventListener('markerLost', () => {
-                setStatus('✅ Ready — point at a marker', 'st-success');
-            });
-        });
+// ═══════════════════════════════════════════════════════════
+// CAMERA
+// ═══════════════════════════════════════════════════════════
+const permOverlay = document.getElementById('perm-overlay');
 
-        // Wait for AR.js to signal camera is running
-        document.addEventListener('arjs-session-started', () => {
-            setStatus('✅ Camera active — point at a marker', 'st-success');
-        });
-
-        // Fallback status update via video element AR.js creates
-        setTimeout(() => {
-            const vid = document.querySelector('video');
-            if (vid) {
-                vid.addEventListener('loadedmetadata', () => {
-                    setStatus('✅ Camera active — point at a marker', 'st-success');
-                });
-                if (vid.readyState >= 2) {
-                    setStatus('✅ Camera active — point at a marker', 'st-success');
-                }
-            } else {
-                // Still loading
-                setStatus('🔄 Loading AR engine…', 'st-loading');
-            }
-        }, 2000);
-
-        // Final safety fallback
-        setTimeout(() => {
-            if (statusEl.classList.contains('st-loading')) {
-                setStatus('✅ Ready — point at a marker', 'st-success');
-            }
-        }, 6000);
-    }
-
-    function showError(icon, title, msg) {
-        document.getElementById('ov-icon').textContent  = icon;
-        document.getElementById('ov-title').textContent = title;
-        document.getElementById('ov-msg').textContent   = msg;
-        document.getElementById('ov-action').textContent = 'Try Again';
-        document.getElementById('ov-action').onclick    = requestCamera;
-        overlay.classList.add('show');
-        setStatus('❌ ' + title, 'st-error');
-    }
-
-    function goBack() {
-        // Stop any camera streams before leaving
-        document.querySelectorAll('video').forEach(v => {
-            if (v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-        });
-        window.history.length > 1 ? window.history.back() : (window.location.href = '/');
-    }
-
-    // Auto-start if permission is already granted
-    window.addEventListener('load', () => {
-        if (navigator.permissions) {
-            navigator.permissions.query({ name: 'camera' }).then(result => {
-                if (result.state === 'granted') {
-                    // Permission already granted — launch directly
-                    launchAR();
-                }
-                // else: overlay is already showing asking for permission
-            }).catch(() => {
-                // Permissions API not available — show the overlay button
-            });
-        }
+async function requestCamera() {
+  permOverlay.classList.remove('show');
+  setStatus('⏳ Starting camera…', 'st-loading');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal:'environment' }, width:{ideal:1280}, height:{ideal:720} },
+      audio: false
     });
+    videoEl.srcObject = stream;
+    await new Promise(r => { videoEl.onloadedmetadata = r; });
+    videoEl.play();
+    cameraActive = true;
+    resizeCanvases();
+    window.addEventListener('resize', resizeCanvases);
+    setStatus('✅ AI scanning active', 'st-ready');
+    setSubStatus('Point camera at any object');
+    startLoop();
+  } catch(err) {
+    console.error('[EcoLearn AR] Camera error:', err);
+    if (err.name === 'NotAllowedError')
+      showError('🚫','PERMISSION DENIED','Allow camera access in your browser settings, then refresh.');
+    else if (err.name === 'NotFoundError')
+      showError('🔍','NO CAMERA','No camera detected. Connect a camera and reload.');
+    else
+      showError('⚠️','CAMERA ERROR', err.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER LOOP — OpenCV grayscale edge overlay as visual AR FX
+// ═══════════════════════════════════════════════════════════
+function resizeCanvases() {
+  arCanvas.width     = window.innerWidth;
+  arCanvas.height    = window.innerHeight;
+  processCanvas.width  = videoEl.videoWidth  || 640;
+  processCanvas.height = videoEl.videoHeight || 480;
+}
+
+function startLoop() {
+  rafId = requestAnimationFrame(loopFrame);
+  scheduleClassify();
+}
+
+function loopFrame() {
+  rafId = requestAnimationFrame(loopFrame);
+  if (!videoEl.videoWidth) return;
+
+  const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+  processCanvas.width = vw; processCanvas.height = vh;
+  procCtx.drawImage(videoEl, 0, 0, vw, vh);
+
+  // OpenCV: draw subtle edge-detect glow overlay
+  if (cvReady && typeof cv !== 'undefined' && cv.Mat) {
+    try {
+      const src = cv.imread(processCanvas);
+      const gray = new cv.Mat(), edges = new cv.Mat(), colored = new cv.Mat();
+      cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+      cv.Canny(gray, edges, 60, 140);
+      cv.cvtColor(edges, colored, cv.COLOR_GRAY2RGBA);
+
+      // make edges green-tinted
+      const ch = new cv.MatVector();
+      cv.split(colored, ch);
+      ch.get(0).setTo(new cv.Scalar(0));    // R=0
+      ch.get(1).setTo(new cv.Scalar(255));  // G=255
+      ch.get(2).setTo(new cv.Scalar(80));   // B=80
+      cv.merge(ch, colored);
+
+      // composite to overlay canvas at low opacity
+      arCtx.clearRect(0, 0, arCanvas.width, arCanvas.height);
+      const edgeCanvas = document.createElement('canvas');
+      edgeCanvas.width = vw; edgeCanvas.height = vh;
+      cv.imshow(edgeCanvas, colored);
+      arCtx.save();
+      arCtx.globalAlpha = 0.18;
+      arCtx.drawImage(edgeCanvas, 0, 0, arCanvas.width, arCanvas.height);
+      arCtx.restore();
+
+      src.delete(); gray.delete(); edges.delete(); colored.delete();
+      ch.delete();
+    } catch(e) { arCtx.clearRect(0,0,arCanvas.width,arCanvas.height); }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AI CLASSIFICATION
+// ═══════════════════════════════════════════════════════════
+
+// Classes that should NEVER trigger an eco result
+const BLOCKED_CLASSES = [
+  'person','people','man','woman','boy','girl','child','human','face',
+  'head','portrait','selfie','hair','skin','nose','eye','mouth','ear',
+  'body','arm','hand','finger','leg','foot','crowd','audience',
+  'suit','shirt','dress','clothing','jersey','uniform',
+  'swimming trunks','bikini','brassiere',
+];
+
+// Minimum confidence to trigger a result (0–1)
+// 65% — prevents low-confidence mis-classifications like "birdhouse" at 43%
+const MIN_CONFIDENCE = 0.65;
+
+function scheduleClassify() {
+  classifyTimer = setInterval(classify, INTERVAL);
+}
+
+async function classify() {
+  if (!model || !videoEl.videoWidth || panelShown) return;
+  setStatus('🔍 Scanning…', 'st-scanning');
+  document.getElementById('vf-ring').classList.add('scanning');
+  document.getElementById('vf-label').textContent = 'ANALYSING OBJECT…';
+
+  try {
+    const predictions = await model.classify(videoEl, 5);
+
+    // Reset viewfinder state if nothing is useful
+    if (!predictions?.length) {
+      noObjectFound();
+      return;
+    }
+
+    // Check top prediction confidence threshold
+    const top = predictions[0];
+    if (top.probability < MIN_CONFIDENCE) {
+      noObjectFound('Point at a clear object');
+      return;
+    }
+
+    // Block human/face predictions
+    const topClass = top.className.toLowerCase();
+    const isHuman = BLOCKED_CLASSES.some(b => topClass.includes(b));
+    if (isHuman) {
+      noObjectFound('Point at an object, not a person 😊');
+      return;
+    }
+
+    // All checks passed — look up eco data
+    const eco = lookupEco(predictions);
+
+    // If no eco database match found, show a friendly hint instead
+    if (!eco) {
+      const bestGuess = predictions[0]?.className?.split(',')[0] || 'object';
+      noObjectFound(`Try an eco object — try bottle, plant, bulb…`);
+      return;
+    }
+
+    showEcoResult(eco);
+  } catch(e) {
+    noObjectFound();
+  }
+}
+
+function noObjectFound(msg) {
+  document.getElementById('vf-ring').classList.remove('scanning');
+  document.getElementById('vf-label').textContent = msg || 'POINT AT ANY OBJECT';
+  setStatus('✅ AI scanning active', 'st-ready');
+  setSubStatus(msg || 'Hold camera steady over an object');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ECO RESULT PANEL
+// ═══════════════════════════════════════════════════════════
+let currentEco = null;
+
+function showEcoResult(eco) {
+  currentEco = eco;
+  panelShown = true;
+
+  // Flash
+  const flash = document.getElementById('scan-flash');
+  flash.style.background = eco.color;
+  flash.classList.add('flash');
+  setTimeout(() => flash.classList.remove('flash'), 200);
+  playTone(eco.ecoScore > 5 ? 880 : 440);
+
+  // Viewfinder
+  const vfRing = document.getElementById('vf-ring');
+  vfRing.classList.remove('scanning');
+  vfRing.classList.add('found');
+  document.getElementById('vf-label').textContent = eco.name.toUpperCase() + ' DETECTED';
+
+  setStatus(`🎯 ${eco.name} scanned!`, 'st-found');
+  setSubStatus(getEcoRating(eco.ecoScore));
+
+  // Populate panel
+  document.getElementById('ep-icon').textContent = eco.icon;
+  document.getElementById('ep-icon').style.background = eco.bg;
+  document.getElementById('ep-icon').style.border = `1px solid ${eco.border}`;
+  document.getElementById('ep-name').textContent  = eco.name;
+  document.getElementById('ep-cat').textContent   = eco.cat;
+  document.getElementById('ep-cat').style.color   = eco.color;
+  document.getElementById('ep-conf-val').textContent = eco.confidence + '%';
+
+  // Scores (animate after slight delay)
+  const ecoFill    = document.getElementById('ep-score-fill');
+  const sustainFill= document.getElementById('ep-sustain-fill');
+  ecoFill.style.background    = eco.color;
+  ecoFill.style.boxShadow     = `0 0 8px ${eco.color}`;
+  sustainFill.style.background= eco.color;
+  sustainFill.style.boxShadow = `0 0 8px ${eco.color}`;
+
+  document.getElementById('ep-score-val').style.color   = eco.color;
+  document.getElementById('ep-sustain-val').style.color = eco.color;
+
+  setTimeout(() => {
+    ecoFill.style.width     = `${eco.ecoScore * 10}%`;
+    sustainFill.style.width = `${eco.sustainPct}%`;
+    document.getElementById('ep-score-val').textContent   = `${eco.ecoScore}/10`;
+    document.getElementById('ep-sustain-val').textContent = `${eco.sustainPct}%`;
+  }, 100);
+
+  // Stats
+  document.getElementById('ep-carbon').textContent  = typeof eco.carbon === 'number' ? (eco.carbon < 0 ? `−${Math.abs(eco.carbon)}` : eco.carbon) : eco.carbon;
+  document.getElementById('ep-recycle').textContent = eco.recycle;
+  document.getElementById('ep-energy').textContent  = eco.energy;
+
+  // Facts
+  const factsEl = document.getElementById('ep-facts');
+  factsEl.innerHTML = '';
+  const factIcons = ['🌍','📊','💡','♻️'];
+  eco.facts.slice(0, 3).forEach((f, i) => {
+    const d = document.createElement('div');
+    d.className = 'ep-fact';
+    d.style.borderLeftColor = eco.color;
+    d.innerHTML = `<span class="fact-icon">${factIcons[i % factIcons.length]}</span>${f}`;
+    factsEl.appendChild(d);
+  });
+
+  // Style primary button
+  const btn = document.getElementById('ep-challenge-btn');
+  btn.style.background = `linear-gradient(135deg, ${eco.colorDim}, ${eco.color})`;
+
+  // Show panel
+  document.getElementById('eco-panel').classList.add('visible');
+}
+
+function getEcoRating(score) {
+  if (score >= 8.5) return '🌟 Excellent — highly sustainable!';
+  if (score >= 6.5) return '✅ Good — fairly eco-friendly';
+  if (score >= 4)   return '⚠️ Moderate — room to improve';
+  if (score >= 2)   return '🔴 Poor — high environmental impact';
+  return '❌ Very High Impact — avoid if possible';
+}
+
+function dismissPanel() {
+  document.getElementById('eco-panel').classList.remove('visible');
+  document.getElementById('vf-ring').classList.remove('found','scanning');
+  document.getElementById('vf-label').textContent = 'POINT AT ANY OBJECT';
+  ecoScoreFills();
+  panelShown = false;
+  currentEco = null;
+  setStatus('✅ AI scanning active','st-ready');
+  setSubStatus('Point camera at any object');
+}
+
+function ecoScoreFills() {
+  document.getElementById('ep-score-fill').style.width    = '0%';
+  document.getElementById('ep-sustain-fill').style.width  = '0%';
+  document.getElementById('ep-score-val').textContent     = '0/10';
+  document.getElementById('ep-sustain-val').textContent   = '0%';
+}
+
+function goToChallenge() {
+  if (currentEco) {
+    stopCamera();
+    window.location.href = `/challenges?module=${encodeURIComponent(currentEco.module)}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════
+function setStatus(msg, cls) {
+  const el = document.getElementById('status');
+  el.textContent = msg; el.className = 'status ' + cls;
+}
+function setSubStatus(msg) { document.getElementById('sub-status').textContent = msg; }
+
+function showError(icon, title, msg) {
+  document.getElementById('pov-icon').textContent  = icon;
+  document.getElementById('pov-title').textContent = title;
+  document.getElementById('pov-msg').textContent   = msg;
+  document.getElementById('pov-action').textContent= 'TRY AGAIN';
+  document.getElementById('pov-action').onclick    = requestCamera;
+  permOverlay.classList.add('show');
+  setStatus('❌ Error','st-error');
+}
+
+function playTone(freq) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = freq; o.type = 'sine';
+    g.gain.setValueAtTime(0.2, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    o.start(); o.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+function stopCamera() {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  if (classifyTimer) { clearInterval(classifyTimer); classifyTimer = null; }
+  videoEl.srcObject?.getTracks().forEach(t => t.stop());
+}
+
+function goBack() {
+  stopCamera();
+  window.history.length > 1 ? window.history.back() : (window.location.href = '/');
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+// Hide perm overlay until models load
+permOverlay.classList.remove('show');
+initModels();
 </script>
 </body>
 </html>

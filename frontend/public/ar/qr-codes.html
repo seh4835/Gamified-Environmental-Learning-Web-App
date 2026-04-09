@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoLearn AR — Printable QR Codes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --green:#00ff88; --purple:#a855f7; --blue:#38bdf8;
+      --yellow:#fbbf24; --orange:#fb923c; --teal:#34d399;
+    }
+    * { margin:0; padding:0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050508;
+      color: #f1f5f9;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    header {
+      text-align: center; margin-bottom: 48px;
+    }
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 32px; font-weight: 900;
+      color: var(--green);
+      text-shadow: 0 0 24px rgba(0,255,136,0.6);
+      letter-spacing: 0.08em; margin-bottom: 8px;
+    }
+    header p { color: #6b7280; font-size: 14px; line-height: 1.6; }
+    .print-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 20px; padding: 12px 32px;
+      background: linear-gradient(135deg, #00c96b, #00ff88);
+      border: none; border-radius: 28px; cursor: pointer;
+      font-family: 'Orbitron', monospace; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.1em; color: #000;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .print-btn:hover { opacity: 0.88; transform: scale(1.03); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px; max-width: 1200px; margin: 0 auto;
+    }
+    .qr-card {
+      background: rgba(17,17,17,0.98);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; overflow: hidden;
+      position: relative;
+    }
+    .qr-card::before {
+      content: '';
+      position: absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, transparent, var(--c, #00ff88), transparent);
+    }
+    .card-top {
+      padding: 20px 20px 16px;
+      background: color-mix(in srgb, var(--c, #00ff88) 10%, transparent);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .card-emoji { font-size: 36px; }
+    .card-meta { flex: 1; }
+    .card-module {
+      font-family: 'Orbitron', monospace; font-size: 13px;
+      font-weight: 700; color: #f1f5f9; letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .card-pts {
+      font-family: 'Orbitron', monospace; font-size: 10px;
+      color: var(--c, #00ff88); letter-spacing: 0.1em;
+    }
+    .qr-wrap {
+      background: #fff;
+      margin: 0 20px 16px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .qr-wrap canvas { display: block; }
+    .card-id {
+      font-family: 'Orbitron', monospace; font-size: 8px;
+      color: #374151; text-align: center;
+      padding: 0 20px 16px; letter-spacing: 0.12em;
+    }
+    @media print {
+      body { background: #fff; color: #000; padding: 16px; }
+      header { color: #000; }
+      header h1 { color: #000; text-shadow: none; }
+      .print-btn { display: none; }
+      .qr-card { border: 1px solid #ccc; background: #fff; break-inside: avoid; }
+      .card-module { color: #000; }
+      .card-top { background: #f9fafb; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🌿 ECOLEARN AR — QR CODES</h1>
+  <p>Print and use these QR codes with the EcoLearn AR Scanner to unlock environmental challenges.</p>
+  <button class="print-btn" onclick="window.print()">🖨️ PRINT ALL QR CODES</button>
+</header>
+
+<div class="grid" id="qr-grid"></div>
+
+<script>
+const MODULES = [
+  { id:'ECO_CLIMATE',   module:'Climate Change',         emoji:'🌡️', pts:50, color:'#00ff88' },
+  { id:'ECO_WASTE',     module:'Waste Management',       emoji:'♻️', pts:50, color:'#a855f7' },
+  { id:'ECO_WATER',     module:'Water Conservation',     emoji:'💧', pts:50, color:'#38bdf8' },
+  { id:'ECO_ENERGY',    module:'Renewable Energy',       emoji:'☀️', pts:60, color:'#fbbf24' },
+  { id:'ECO_BIO',       module:'Biodiversity',           emoji:'🦋', pts:50, color:'#34d399' },
+  { id:'ECO_AGRI',      module:'Sustainable Agriculture',emoji:'🌾', pts:60, color:'#fb923c' },
+  { id:'ECO_URBAN',     module:'Urban Sustainability',   emoji:'🌆', pts:55, color:'#38bdf8' },
+  { id:'ECO_CARBON',    module:'Carbon Footprint',       emoji:'👣', pts:55, color:'#a855f7' },
+  { id:'ECO_POLICY',    module:'Environmental Policy',   emoji:'📜', pts:50, color:'#00ff88' },
+  { id:'ECO_COMMUNITY', module:'Community Action',       emoji:'🤝', pts:60, color:'#fbbf24' },
+];
+
+const grid = document.getElementById('qr-grid');
+
+MODULES.forEach(m => {
+  const card = document.createElement('div');
+  card.className = 'qr-card';
+  card.style.setProperty('--c', m.color);
+
+  const canvasId = 'qr-' + m.id;
+  card.innerHTML = `
+    <div class="card-top">
+      <span class="card-emoji">${m.emoji}</span>
+      <div class="card-meta">
+        <div class="card-module">${m.module}</div>
+        <div class="card-pts">+${m.pts} XP REWARD</div>
+      </div>
+    </div>
+    <div class="qr-wrap">
+      <canvas id="${canvasId}"></canvas>
+    </div>
+    <div class="card-id">ID: ${m.id}</div>
+  `;
+  grid.appendChild(card);
+
+  // Generate QR with the module ID as data
+  QRCode.toCanvas(document.getElementById(canvasId), m.id, {
+    width: 200,
+    margin: 1,
+    color: { dark: '#000000', light: '#ffffff' }
+  }, err => { if (err) console.error('QR error:', err); });
+});
+</script>
+</body>
+</html>
