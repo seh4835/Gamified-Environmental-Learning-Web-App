@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Loader from "../../components/ui/Loader";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import challengeIcon from "../../icons/icon_challenge.png";
+import { CHALLENGES } from "../Challenges";
 
 const STATUS_STYLES = {
   Approved: { chipClass: "chip-green",  label: "Approved" },
   Pending:  { chipClass: "chip-gold",   label: "Pending" },
   Rejected: { chipClass: "chip-red",    label: "Rejected" },
+  "Not Submitted": { chipClass: "chip-blue", label: "Not Submitted" },
 };
 
 export default function Submissions() {
@@ -40,13 +43,29 @@ export default function Submissions() {
 
   if (loading) return <Loader fullScreen text="Loading submissions..." />;
 
-  const filtered = submissions.filter(s => filter === "All" || s.status === filter);
+  const displaySubmissions = isAdmin ? submissions : CHALLENGES.map(c => {
+    const sub = submissions.find(s => s.module === c.module);
+    if (sub) return sub;
+    return {
+      id: "unsub-" + c.module,
+      module: c.module,
+      task: c.task,
+      status: "Not Submitted",
+      points: c.pts,
+      created_at: "—"
+    };
+  });
+
+  const filtered = displaySubmissions.filter(s => filter === "All" || s.status === filter);
   const counts = {
-    All: submissions.length,
-    Pending: submissions.filter(s => s.status === "Pending").length,
-    Approved: submissions.filter(s => s.status === "Approved").length,
-    Rejected: submissions.filter(s => s.status === "Rejected").length,
+    All: displaySubmissions.length,
+    Pending: displaySubmissions.filter(s => s.status === "Pending").length,
+    Approved: displaySubmissions.filter(s => s.status === "Approved").length,
+    Rejected: displaySubmissions.filter(s => s.status === "Rejected").length,
   };
+  if (!isAdmin) {
+    counts["Not Submitted"] = displaySubmissions.filter(s => s.status === "Not Submitted").length;
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#000", color: "#e2e8f0" }}>
@@ -77,7 +96,7 @@ export default function Submissions() {
 
         {/* Filter tabs */}
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-          {["All", "Pending", "Approved", "Rejected"].map(tab => (
+          {(isAdmin ? ["All", "Pending", "Approved", "Rejected"] : ["All", "Not Submitted", "Pending", "Approved", "Rejected"]).map(tab => (
             <button key={tab} onClick={() => setFilter(tab)} style={{
               padding: "0.4rem 1rem",
               borderRadius: 6,
@@ -128,6 +147,23 @@ export default function Submissions() {
                       {sub.created_at}
                     </span>
                   </div>
+
+                  {!isAdmin && sub.status === "Not Submitted" && (
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <Link to="/challenges" style={{
+                        display: "inline-block", background: "rgba(56,189,248,0.1)",
+                        border: "1px solid rgba(56,189,248,0.3)", borderRadius: 6,
+                        color: "#38bdf8", padding: "0.4rem 1rem", fontSize: "0.68rem",
+                        fontFamily: "var(--font-heading)", textDecoration: "none",
+                        letterSpacing: "0.1em", transition: "all 0.2s"
+                      }}
+                      onMouseOver={e => e.currentTarget.style.background="rgba(56,189,248,0.2)"}
+                      onMouseOut={e => e.currentTarget.style.background="rgba(56,189,248,0.1)"}
+                      >
+                        START MISSION &rarr;
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Admin approve/reject */}
                   {isAdmin && sub.status === "Pending" && (

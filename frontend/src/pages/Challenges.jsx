@@ -3,7 +3,7 @@ import Loader from "../components/ui/Loader";
 import challengeIcon from "../icons/icon_challenge.png";
 import trophyIcon from "../icons/icon_trophy.png";
 
-const CHALLENGES = [
+export const CHALLENGES = [
   { module: "Climate Change", pts: 50, color: "#00ff88", barColor: "#00ff88",
     quiz: [
       { q: "What causes global warming?", options: ["Oxygen", "CO2 emissions", "Nitrogen", "Hydrogen"], correct: "CO2 emissions" },
