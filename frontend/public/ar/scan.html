@@ -11,9 +11,9 @@
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
 
-  <!-- TensorFlow.js + MobileNet for real-time object recognition -->
+  <!-- TensorFlow.js + COCO-SSD for robust object detection -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
   <!-- OpenCV.js for image preprocessing -->
   <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onCvReady()" onerror="onCvReady()"></script>
 
@@ -887,25 +887,25 @@
       { keywords: ['bicycle', 'bike', 'mountain bike', 'road bike'], icon: '🚲', name: 'Bicycle', cat: 'SUSTAINABLE TRANSPORT', ecoScore: 9.5, sustainPct: 95, carbon: 0, recycle: 'Yes', energy: 'Very Low', color: '#00ff88', colorDim: '#00c96b', bg: 'rgba(0,255,136,.1)', border: 'rgba(0,255,136,.2)', module: 'Urban Sustainability', facts: ['Zero carbon emissions — 100% human-powered transport.', 'Manufacturing a bicycle emits ~96 kg CO₂ vs ~6,000 kg for a car.', 'Cycling for 10 km/day saves ~1.3 tonnes of CO₂ per year.', 'Bikes can last 20–30 years with basic maintenance.'] },
       { keywords: ['solar panel', 'solar cell', 'photovoltaic'], icon: '☀️', name: 'Solar Panel', cat: 'RENEWABLE ENERGY', ecoScore: 9.8, sustainPct: 98, carbon: -50, recycle: 'Partial', energy: 'Zero (Output)', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Renewable Energy', facts: ['A single panel generates ~300W, saving ~1 tonne of CO₂ per year.', 'Solar panels last 25–30 years with minimal maintenance.', 'The energy payback period is just 1–3 years.', 'Solar + storage can power a home 24/7 with zero emissions.'] },
       { keywords: ['plant', 'flower', 'tree', 'leaf', 'potted', 'herb', 'grass'], icon: '🌿', name: 'Plant', cat: 'BIODIVERSITY', ecoScore: 10, sustainPct: 100, carbon: -22, recycle: 'Natural', energy: 'None', color: '#34d399', colorDim: '#10b981', bg: 'rgba(52,211,153,.1)', border: 'rgba(52,211,153,.2)', module: 'Biodiversity', facts: ['A single tree absorbs ~22 kg of CO₂ per year.', 'House plants remove up to 87% of air toxins in 24 hours.', 'Plants support pollinators — vital for 75% of our food supply.', 'Urban green spaces reduce city temperatures by up to 5°C.'] },
-      { keywords: ['canteen', 'water bottle', 'reusable bottle', 'thermos'], icon: '🫙', name: 'Reusable Bottle', cat: 'WASTE REDUCTION', ecoScore: 8.5, sustainPct: 85, carbon: 0.5, recycle: 'Yes', energy: 'Low', color: '#38bdf8', colorDim: '#0ea5e9', bg: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.2)', module: 'Water Conservation', facts: ['Replaces ~150 single-use plastic bottles per year per person.', 'Saves 83 g of plastic waste entering landfill each use.', 'Steel/glass bottles last 10+ years unlike plastic counterparts.', 'Reducing plastic use prevents microplastics in your drinking water.'] },
+      { keywords: ['canteen', 'water bottle', 'reusable bottle', 'thermos', 'bottle', 'cup', 'wine glass'], icon: '🫙', name: 'Reusable Bottle', cat: 'WASTE REDUCTION', ecoScore: 8.5, sustainPct: 85, carbon: 0.5, recycle: 'Yes', energy: 'Low', color: '#38bdf8', colorDim: '#0ea5e9', bg: 'rgba(56,189,248,.1)', border: 'rgba(56,189,248,.2)', module: 'Water Conservation', facts: ['Replaces ~150 single-use plastic bottles per year per person.', 'Saves 83 g of plastic waste entering landfill each use.', 'Steel/glass bottles last 10+ years unlike plastic counterparts.', 'Reducing plastic use prevents microplastics in your drinking water.'] },
       { keywords: ['compost', 'compost bin', 'organic'], icon: '🌱', name: 'Compost', cat: 'WASTE MANAGEMENT', ecoScore: 9.0, sustainPct: 90, carbon: -0.3, recycle: '100% Natural', energy: 'None', color: '#34d399', colorDim: '#10b981', bg: 'rgba(52,211,153,.1)', border: 'rgba(52,211,153,.2)', module: 'Waste Management', facts: ['Composting diverts 30% of household waste from landfills.', 'Compost enriches soil, reducing need for chemical fertilisers.', 'Landfill food waste emits methane — 25× more potent than CO₂.', 'Home composting saves ~100 kg of CO₂ equivalent per year.'] },
 
       // ── Moderate ─────────────────────────────────────────────
       { keywords: ['laptop', 'notebook computer', 'computer'], icon: '💻', name: 'Laptop', cat: 'ELECTRONIC DEVICE', ecoScore: 4.5, sustainPct: 45, carbon: 300, recycle: 'Partial', energy: 'Medium', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Carbon Footprint', facts: ['Manufacturing a laptop emits ~300 kg of CO₂.', 'Using a laptop for 8h/day for a year costs ~22 kg CO₂.', 'Only 20% of e-waste is formally recycled globally.', 'Keeping your laptop for an extra 2 years halves its carbon impact.'] },
-      { keywords: ['book', 'textbook', 'paperback', 'novel', 'magazine'], icon: '📚', name: 'Book / Paper', cat: 'PAPER PRODUCT', ecoScore: 5.5, sustainPct: 55, carbon: 4, recycle: 'Yes (100%)', energy: 'Low', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Sustainable Agriculture', facts: ['Recycling 1 tonne of paper saves 17 trees and 4,000 kWh of energy.', 'The publishing industry produces ~16 million tonnes of CO₂/year.', 'Digital reading reduces paper carbon footprint by ~95%.', 'Choose books from FSC-certified publishers to protect forests.'] },
-      { keywords: ['shopping bag', 'tote', 'cloth bag'], icon: '🛍️', name: 'Cloth Bag', cat: 'REUSABLE ITEM', ecoScore: 7.5, sustainPct: 75, carbon: 2, recycle: 'Yes', energy: 'Low', color: '#00ff88', colorDim: '#00c96b', bg: 'rgba(0,255,136,.1)', border: 'rgba(0,255,136,.2)', module: 'Waste Management', facts: ['A cotton bag must be reused 173× to be better than plastic.', 'Replaces 300–700 single-use plastic bags per year.', 'Single-use plastic bags take 500+ years to decompose.', 'Natural fibre bags biodegrade within a few months.'] },
-      { keywords: ['food', 'fruit', 'vegetable', 'bread', 'apple', 'banana', 'orange', 'vegetable'], icon: '🥦', name: 'Food / Produce', cat: 'FOOD SYSTEMS', ecoScore: 7.0, sustainPct: 70, carbon: 2, recycle: 'Compostable', energy: 'Low', color: '#34d399', colorDim: '#10b981', bg: 'rgba(52,211,153,.1)', border: 'rgba(52,211,153,.2)', module: 'Sustainable Agriculture', facts: ['Fruits & vegetables have the lowest carbon footprint of all foods.', 'Buying local food reduces food-mile emissions by up to 80%.', '1/3 of all food produced globally is wasted every year.', 'A plant-based diet reduces food carbon footprint by 50%.'] },
+      { keywords: ['book jacket', 'dust jacket', 'dust cover', 'dust wrapper', 'book', 'textbook', 'paperback', 'novel', 'magazine', 'comic book', 'atlas', 'brochure', 'pamphlet', 'binder', 'ring binder', 'ring-binder', 'folder', 'diary', 'journal', 'envelope'], icon: '📚', name: 'Book / Paper', cat: 'PAPER PRODUCT', ecoScore: 5.5, sustainPct: 55, carbon: 4, recycle: 'Yes (100%)', energy: 'Low', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Sustainable Agriculture', facts: ['Recycling 1 tonne of paper saves 17 trees and 4,000 kWh of energy.', 'The publishing industry produces ~16 million tonnes of CO₂/year.', 'Digital reading reduces paper carbon footprint by ~95%.', 'Choose books from FSC-certified publishers to protect forests.'] },
+      { keywords: ['shopping bag', 'tote', 'cloth bag', 'backpack', 'handbag', 'suitcase'], icon: '🛍️', name: 'Cloth Bag', cat: 'REUSABLE ITEM', ecoScore: 7.5, sustainPct: 75, carbon: 2, recycle: 'Yes', energy: 'Low', color: '#00ff88', colorDim: '#00c96b', bg: 'rgba(0,255,136,.1)', border: 'rgba(0,255,136,.2)', module: 'Waste Management', facts: ['A cotton bag must be reused 173× to be better than plastic.', 'Replaces 300–700 single-use plastic bags per year.', 'Single-use plastic bags take 500+ years to decompose.', 'Natural fibre bags biodegrade within a few months.'] },
+      { keywords: ['food', 'fruit', 'vegetable', 'bread', 'apple', 'banana', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'sandwich'], icon: '🥦', name: 'Food / Produce', cat: 'FOOD SYSTEMS', ecoScore: 7.0, sustainPct: 70, carbon: 2, recycle: 'Compostable', energy: 'Low', color: '#34d399', colorDim: '#10b981', bg: 'rgba(52,211,153,.1)', border: 'rgba(52,211,153,.2)', module: 'Sustainable Agriculture', facts: ['Fruits & vegetables have the lowest carbon footprint of all foods.', 'Buying local food reduces food-mile emissions by up to 80%.', '1/3 of all food produced globally is wasted every year.', 'A plant-based diet reduces food carbon footprint by 50%.'] },
       { keywords: ['electric fan', 'fan'], icon: '🌀', name: 'Electric Fan', cat: 'HOME APPLIANCE', ecoScore: 5.0, sustainPct: 50, carbon: 18, recycle: 'Partial', energy: 'Low-Medium', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Carbon Footprint', facts: ['A ceiling fan uses 15–75 W vs 1,000–3,500 W for air conditioning.', 'Using fans instead of AC saves ~200 kg of CO₂ per summer.', 'Fans cool people, not rooms — turn off when leaving.', 'Energy Star fans are 20% more efficient than standard models.'] },
       { keywords: ['bulb', 'light bulb', 'lamp', 'light'], icon: '💡', name: 'Light Bulb', cat: 'ENERGY EFFICIENCY', ecoScore: 6.5, sustainPct: 65, carbon: 10, recycle: 'Yes (LED)', energy: 'Very Low (LED)', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Renewable Energy', facts: ['LED bulbs use 75% less energy than incandescent ones.', 'Switching to LEDs saves ~$225 in energy costs over 5 years.', 'LED bulbs last 25× longer than traditional bulbs.', 'Replacing 1 incandescent with LED saves 150 kg of CO₂ over its life.'] },
       { keywords: ['bus', 'coach'], icon: '🚌', name: 'Bus / Public Transport', cat: 'SUSTAINABLE TRANSPORT', ecoScore: 7.5, sustainPct: 75, carbon: 89, recycle: 'N/A', energy: 'Medium', color: '#00ff88', colorDim: '#00c96b', bg: 'rgba(0,255,136,.1)', border: 'rgba(0,255,136,.2)', module: 'Urban Sustainability', facts: ['A bus emits 89 g CO₂/km vs 192 g for a single-occupancy car.', 'Public transport can carry up to 2,000 passengers per lane per hour.', 'Replacing one car journey per week saves 500 kg CO₂/year.', 'Electric buses emit up to 76% less carbon than diesel alternatives.'] },
       // ── Electronics / Gadgets ────────────────────────────────
-      { keywords: ['cellular telephone', 'mobile phone', 'smartphone', 'cell phone', 'iphone', 'android', 'handset', 'flip phone', 'hand-held computer'], icon: '📱', name: 'Smartphone', cat: 'ELECTRONIC DEVICE', ecoScore: 3.5, sustainPct: 35, carbon: 70, recycle: 'Partial', energy: 'Low-Medium', color: '#fb923c', colorDim: '#ea580c', bg: 'rgba(251,146,60,.1)', border: 'rgba(251,146,60,.2)', module: 'Carbon Footprint', facts: ['Manufacturing a smartphone emits ~70 kg of CO₂ — most of its lifetime impact.', 'Only 1% of smartphones are recycled at end-of-life globally.', 'Keeping your phone 1 extra year reduces its carbon footprint by 33%.', 'Rare earth mining for phone components destroys ecosystems.'] },
-      { keywords: ['television', 'tv', 'monitor', 'screen', 'display', 'desktop computer', 'computer keyboard', 'mouse'], icon: '🖥️', name: 'Screen / TV', cat: 'ELECTRONIC DEVICE', ecoScore: 3.8, sustainPct: 38, carbon: 400, recycle: 'Partial', energy: 'High', color: '#fb923c', colorDim: '#ea580c', bg: 'rgba(251,146,60,.1)', border: 'rgba(251,146,60,.2)', module: 'Carbon Footprint', facts: ['A large TV can use up to 400 kWh of electricity per year.', 'E-waste is the fastest-growing waste stream globally.', 'Enabling eco/energy-saving mode reduces screen power use by 30%.', 'Recycling a monitor recovers lead, glass and precious metals.'] },
-      { keywords: ['refrigerator', 'fridge', 'washing machine', 'dishwasher', 'microwave', 'oven'], icon: '🧊', name: 'Home Appliance', cat: 'ENERGY CONSUMER', ecoScore: 4.0, sustainPct: 40, carbon: 200, recycle: 'Yes (metal)', energy: 'Medium-High', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Carbon Footprint', facts: ['Refrigerators account for about 14% of household electricity use.', 'A-rated appliances use up to 60% less energy than older models.', 'Full loads in washing machines save ~32 kg CO₂/year vs half loads.', 'Modern heat-pump dryers use 50% less energy than traditional ones.'] },
+      { keywords: ['cellular telephone', 'cellular phone', 'cellphone', 'cell phone', 'mobile phone', 'smartphone', 'hand-held computer', 'iphone', 'android', 'handset', 'flip phone'], icon: '📱', name: 'Smartphone', cat: 'ELECTRONIC DEVICE', ecoScore: 3.5, sustainPct: 35, carbon: 70, recycle: 'Partial', energy: 'Low-Medium', color: '#fb923c', colorDim: '#ea580c', bg: 'rgba(251,146,60,.1)', border: 'rgba(251,146,60,.2)', module: 'Carbon Footprint', facts: ['Manufacturing a smartphone emits ~70 kg of CO₂ — most of its lifetime impact.', 'Only 1% of smartphones are recycled at end-of-life globally.', 'Keeping your phone 1 extra year reduces its carbon footprint by 33%.', 'Rare earth mining for phone components destroys ecosystems.'] },
+      { keywords: ['television', 'tv', 'monitor', 'screen', 'display', 'desktop computer', 'computer keyboard', 'mouse', 'keyboard'], icon: '🖥️', name: 'Screen / TV', cat: 'ELECTRONIC DEVICE', ecoScore: 3.8, sustainPct: 38, carbon: 400, recycle: 'Partial', energy: 'High', color: '#fb923c', colorDim: '#ea580c', bg: 'rgba(251,146,60,.1)', border: 'rgba(251,146,60,.2)', module: 'Carbon Footprint', facts: ['A large TV can use up to 400 kWh of electricity per year.', 'E-waste is the fastest-growing waste stream globally.', 'Enabling eco/energy-saving mode reduces screen power use by 30%.', 'Recycling a monitor recovers lead, glass and precious metals.'] },
+      { keywords: ['refrigerator', 'fridge', 'washing machine', 'dishwasher', 'microwave', 'oven', 'toaster', 'sink'], icon: '🧊', name: 'Home Appliance', cat: 'ENERGY CONSUMER', ecoScore: 4.0, sustainPct: 40, carbon: 200, recycle: 'Yes (metal)', energy: 'Medium-High', color: '#fbbf24', colorDim: '#d97706', bg: 'rgba(251,191,36,.1)', border: 'rgba(251,191,36,.2)', module: 'Carbon Footprint', facts: ['Refrigerators account for about 14% of household electricity use.', 'A-rated appliances use up to 60% less energy than older models.', 'Full loads in washing machines save ~32 kg CO₂/year vs half loads.', 'Modern heat-pump dryers use 50% less energy than traditional ones.'] },
 
       // ── Low Sustainability ────────────────────────────────────
       { keywords: ['plastic bottle', 'bottle', 'water bottle'], icon: '🧴', name: 'Plastic Bottle', cat: 'SINGLE-USE PLASTIC', ecoScore: 1.5, sustainPct: 15, carbon: 3.4, recycle: 'Partial', energy: 'High (to produce)', color: '#f87171', colorDim: '#ef4444', bg: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.2)', module: 'Waste Management', facts: ['Only 9% of all plastic ever produced has been recycled.', 'A plastic bottle takes up to 450 years to decompose.', '8 million tonnes of plastic enter our oceans every year.', 'Switching to a reusable bottle prevents 156 bottles/year from landfill.'] },
-      { keywords: ['car', 'automobile', 'sports car', 'vehicle', 'sedan'], icon: '🚗', name: 'Car (Petrol/Diesel)', cat: 'HIGH-EMISSION TRANSPORT', ecoScore: 1.8, sustainPct: 18, carbon: 4600, recycle: '30% parts', energy: 'Very High', color: '#f87171', colorDim: '#ef4444', bg: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.2)', module: 'Carbon Footprint', facts: ['An average car emits 4.6 tonnes of CO₂ per year.', 'Manufacturing a car produces ~6 tonnes of CO₂.', 'Cars sit idle 95% of their lifetime.', 'Switching to an EV cuts driving emissions by up to 70%.'] },
+      { keywords: ['car', 'automobile', 'sports car', 'vehicle', 'sedan', 'truck', 'motorcycle'], icon: '🚗', name: 'Car (Petrol/Diesel)', cat: 'HIGH-EMISSION TRANSPORT', ecoScore: 1.8, sustainPct: 18, carbon: 4600, recycle: '30% parts', energy: 'Very High', color: '#f87171', colorDim: '#ef4444', bg: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.2)', module: 'Carbon Footprint', facts: ['An average car emits 4.6 tonnes of CO₂ per year.', 'Manufacturing a car produces ~6 tonnes of CO₂.', 'Cars sit idle 95% of their lifetime.', 'Switching to an EV cuts driving emissions by up to 70%.'] },
       { keywords: ['cigarette', 'cigar', 'tobacco'], icon: '🚬', name: 'Cigarette', cat: 'HARMFUL PRODUCT', ecoScore: 0.5, sustainPct: 5, carbon: 0.9, recycle: 'No', energy: 'High', color: '#f87171', colorDim: '#ef4444', bg: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.2)', module: 'Waste Management', facts: ['Cigarette butts are the most littered item on Earth — 4.5 trillion/year.', 'They leach toxic chemicals (arsenic, lead, nicotine) into waterways.', 'Tobacco farming destroys 600 million trees per year.', 'One cigarette produces 14 g of CO₂ equivalent.'] },
       { keywords: ['hamburger', 'burger', 'hot dog', 'meat', 'steak'], icon: '🍔', name: 'Meat / Burger', cat: 'HIGH-IMPACT FOOD', ecoScore: 2.0, sustainPct: 20, carbon: 27, recycle: 'Compostable', energy: 'Very High', color: '#fb923c', colorDim: '#ea580c', bg: 'rgba(251,146,60,.1)', border: 'rgba(251,146,60,.2)', module: 'Sustainable Agriculture', facts: ['Beef produces 27 kg CO₂ equivalent per kg of protein.', 'Livestock farming uses 70% of agricultural land globally.', 'Switching to a plant-based burger reduces CO₂ by 89%.', 'Meat production uses 8× more water than growing vegetables.'] },
       { keywords: ['airplane', 'aircraft', 'jet'], icon: '✈️', name: 'Airplane', cat: 'HIGH-EMISSION TRANSPORT', ecoScore: 1.5, sustainPct: 15, carbon: 255, recycle: 'Partial', energy: 'Extremely High', color: '#f87171', colorDim: '#ef4444', bg: 'rgba(248,113,113,.1)', border: 'rgba(248,113,113,.2)', module: 'Carbon Footprint', facts: ['Flying generates 255 g of CO₂ per km per passenger.', 'Aviation accounts for 2.5% of global CO₂ emissions.', 'One transatlantic flight emits ~1.5 tonnes of CO₂.', 'Train travel emits 90% less CO₂ than flying for same route.'] },
@@ -918,25 +918,76 @@
 
     // Lookup function: returns eco profile matching MobileNet prediction
     // Returns null if no confident match found in the eco database
+    //
+    // IMPORTANT: We apply a per-prediction confidence floor (LOOKUP_MIN_CONF)
+    // so that a stray low-confidence prediction (e.g. "book jacket" at 1%) can
+    // never override what the camera is actually seeing (e.g. a phone at 40%).
+    const LOOKUP_MIN_CONF = 0.12; // per-prediction floor inside lookupEco
+
     function lookupEco(predictions) {
-      // Filter out any human/face predictions before eco lookup
+      // Filter: remove human/face classes AND any predictions below the per-pred floor
       const safePreds = predictions.filter(pred => {
+        if (pred.probability < LOOKUP_MIN_CONF) return false;
         const cls = pred.className.toLowerCase();
         return !BLOCKED_CLASSES.some(b => cls.includes(b));
       });
 
       for (const pred of safePreds) {
+        // MobileNet classNames are comma-separated synonyms like:
+        //   "book jacket, dust cover, dust jacket, dust wrapper"
+        //   "cellular telephone, cellular phone, cellphone, cell, mobile phone"
+        // Match on the FULL string OR any individual comma-separated token.
         const cls = pred.className.toLowerCase();
+        const tokens = cls.split(',').map(t => t.trim());
+
         for (const entry of ECO_DB) {
           if (entry.keywords[0] === '__default__') continue;
-          if (entry.keywords.some(kw => cls.includes(kw) || kw.includes(cls.split(',')[0]))) {
+          // A keyword matches if:
+          //   a) the full class string contains the keyword, OR
+          //   b) any comma-token equals the keyword exactly, OR
+          //   c) any comma-token starts with the keyword (e.g. tok="book jacket", kw="book")
+          // We deliberately avoid sub-string-of-token tricks that cause
+          // 'cell' (from phone) to hit inside 'notebook'.
+          const matched = entry.keywords.some(kw => {
+            // A keyword matches if it is a discrete word within the class string.
+            // Using regex to check word boundaries to avoid e.g. 'car' matching 'carton'
+            const regex = new RegExp(`\\b${kw}\\b`, 'i');
+            if (regex.test(cls)) return true;
+
+            return tokens.some(tok =>
+              tok === kw ||                  // exact token match
+              tok.startsWith(kw + ' ') ||   // token starts with keyword+space
+              kw.startsWith(tok + ' ')      // keyword starts with token+space
+            );
+          });
+          if (matched) {
             return { ...entry, confidence: Math.round(pred.probability * 100) };
           }
         }
       }
 
-      // No eco match found — return null to suppress the result panel
-      // (don't show random fallback names like 'birdhouse' or 'wardrobe')
+      // No eco match found in our database — but if MobileNet is confident we found *something*
+      // that is safe, use the fallback so the user doesn't get stuck holding their camera forever.
+      if (safePreds.length > 0) {
+        const topSafepred = safePreds[0];
+
+        // Require a higher confidence for random, unmapped fallbacks so we don't 
+        // lock onto blurry background noise instantly.
+        if (topSafepred.probability < 0.55) return null;
+
+        const defaultEco = ECO_DB.find(e => e.keywords[0] === '__default__');
+
+        // Clean up MobileNet's class name (e.g. "binder, ring-binder" -> "Binder")
+        const rawName = topSafepred.className.split(',')[0];
+        const readableName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+        return {
+          ...defaultEco,
+          name: readableName,
+          confidence: Math.round(topSafepred.probability * 100)
+        };
+      }
+
       return null;
     }
 
@@ -950,7 +1001,15 @@
     let classifyTimer = null;
     let panelShown = false;
     let lastPredTime = 0;
-    const INTERVAL = 800; // ms between AI classifications
+    const INTERVAL = 500; // ms between AI classifications
+
+    // ── Consecutive-win confirmation ──────────────────────────────────
+    // Instead of heavy voting, we just need the SAME object detected in
+    // CONFIRM_STREAK consecutive frames.
+    const CONFIRM_STREAK = 2;
+    let streakName = null;   // name of the object currently on a streak
+    let streakCount = 0;      // how many consecutive frames agreed
+    let streakEco = null;   // the eco object for the current streak
 
     const videoEl = document.getElementById('video');
     const arCanvas = document.getElementById('ar-canvas');
@@ -971,10 +1030,10 @@
         document.getElementById('lo-step').textContent = 'LOADING TENSORFLOW.JS…';
         await tf.ready();
 
-        document.getElementById('lo-step').textContent = 'DOWNLOADING MOBILENET V2…';
-        model = await mobilenet.load({ version: 2, alpha: 1.0 });
+        document.getElementById('lo-step').textContent = 'DOWNLOADING COCO-SSD (OBJECT DETECTION)…';
+        model = await cocoSsd.load();
 
-        console.log('%c[EcoLearn AR] MobileNet ready ✓', 'color:#00ff88;font-weight:bold');
+        console.log('%c[EcoLearn AR] COCO-SSD ready ✓', 'color:#00ff88;font-weight:bold');
         document.getElementById('lo-step').textContent = 'AI MODEL READY ✓';
 
         // Check camera permission
@@ -1043,8 +1102,15 @@
       scheduleClassify();
     }
 
-    function loopFrame() {
+    let lastFpsTime = 0;
+
+    function loopFrame(time) {
       rafId = requestAnimationFrame(loopFrame);
+
+      // Throttle heavy OpenCV edge detection to ~12 FPS to drastically unblock the main thread!
+      if (time - lastFpsTime < 80) return;
+      lastFpsTime = time;
+
       if (!videoEl.videoWidth) return;
 
       const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
@@ -1097,12 +1163,28 @@
       'swimming trunks', 'bikini', 'brassiere',
     ];
 
-    // Minimum confidence to trigger a result (0–1)
-    // 65% — prevents low-confidence mis-classifications like "birdhouse" at 43%
-    const MIN_CONFIDENCE = 0.65;
+    // Minimum confidence to trigger a result (0–1).
+    // 0.45 — high threshold so it doesn't randomly guess noise when moving.
+    const MIN_CONFIDENCE = 0.45;
 
     function scheduleClassify() {
       classifyTimer = setInterval(classify, INTERVAL);
+    }
+
+    // ── Consecutive-win check ─────────────────────────────────────────────
+    // Returns confirmed eco or null. Fires the panel once the same eco name
+    // is returned by CONFIRM_STREAK consecutive classify() calls (~1 second).
+    function checkStreak(eco) {
+      const name = eco ? eco.name : null;
+      if (name && name === streakName) {
+        streakCount++;
+        streakEco = eco;
+      } else {
+        streakName = name;
+        streakCount = name ? 1 : 0;
+        streakEco = eco || null;
+      }
+      return (streakCount >= CONFIRM_STREAK && streakEco) ? streakEco : null;
     }
 
     async function classify() {
@@ -1112,10 +1194,37 @@
       document.getElementById('vf-label').textContent = 'ANALYSING OBJECT…';
 
       try {
-        const predictions = await model.classify(videoEl, 5);
+        // Run COCO-SSD object detection
+        const detections = await model.detect(videoEl);
+
+        const vw = videoEl.videoWidth;
+        const vh = videoEl.videoHeight;
+        const screenArea = vw * vh;
+
+        // Map COCO-SSD output to incorporate spatial bounding box info
+        const predictions = detections.map(d => {
+          const [x, y, w, h] = d.bbox;
+          // Calculate percentage of screen area taken up by the object
+          const areaRatio = (w * h) / screenArea;
+
+          return {
+            className: d.class,
+            probability: d.score,
+            areaRatio: areaRatio,
+            // Relevance score: scales the AI's confidence up significantly if the object 
+            // is taking up a lot of screen space (i.e. the user is holding it up to the camera).
+            // This prevents a high-confidence background object (like a TV 10 feet away) 
+            // from beating a lower-confidence object held right in front of the lens.
+            relevance: d.score * (1 + (areaRatio * 3))
+          };
+        });
+
+        // Sort by physical prominence/relevance rather than just raw strict AI confidence
+        predictions.sort((a, b) => b.relevance - a.relevance);
 
         // Reset viewfinder state if nothing is useful
         if (!predictions?.length) {
+          checkStreak(null);
           noObjectFound();
           return;
         }
@@ -1123,6 +1232,7 @@
         // Check top prediction confidence threshold
         const top = predictions[0];
         if (top.probability < MIN_CONFIDENCE) {
+          checkStreak(null);
           noObjectFound('Point at a clear object');
           return;
         }
@@ -1131,22 +1241,32 @@
         const topClass = top.className.toLowerCase();
         const isHuman = BLOCKED_CLASSES.some(b => topClass.includes(b));
         if (isHuman) {
+          checkStreak(null);
           noObjectFound('Point at an object, not a person 😊');
           return;
         }
 
-        // All checks passed — look up eco data
+        // Look up eco profile for this frame
         const eco = lookupEco(predictions);
 
-        // If no eco database match found, show a friendly hint instead
-        if (!eco) {
-          const bestGuess = predictions[0]?.className?.split(',')[0] || 'object';
-          noObjectFound(`Try an eco object — try bottle, plant, bulb…`);
+        // Feed into consecutive-win streak
+        const confirmed = checkStreak(eco);
+
+        if (!confirmed) {
+          // Give a live status hint while building the streak
+          if (eco) {
+            noObjectFound(`Detecting ${eco.name}… hold steady`);
+          } else {
+            noObjectFound('Try an eco object — bottle, plant, bulb…');
+          }
           return;
         }
 
-        showEcoResult(eco);
+        // Enough consistent frames — show the result
+        showEcoResult(confirmed);
+
       } catch (e) {
+        checkStreak(null);
         noObjectFound();
       }
     }
@@ -1250,6 +1370,10 @@
       ecoScoreFills();
       panelShown = false;
       currentEco = null;
+      // reset streak so next scan starts fresh
+      streakName = null;
+      streakCount = 0;
+      streakEco = null;
       setStatus('✅ AI scanning active', 'st-ready');
       setSubStatus('Point camera at any object');
     }
