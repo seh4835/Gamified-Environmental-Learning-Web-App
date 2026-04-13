@@ -49,7 +49,6 @@ def create_app():
              #"origins": "*",  # Allow all origins for development; restrict in production
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "Authorization"],
-             "supports_credentials": True
          }})
     db.init_app(app)
     jwt.init_app(app)

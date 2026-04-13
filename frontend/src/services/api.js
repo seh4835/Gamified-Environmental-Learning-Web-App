@@ -107,11 +107,7 @@ export const submitQuiz = (data) => api.post("/quizzes/submit", data);
 export const getChallenges = () => api.get("/challenges");
 
 export const submitChallenge = (formData) =>
-  api.post("/challenges/submit", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data"
-    }
-  });
+  api.post("/challenges/submit", formData);
 
 export const getUserSubmissions = () =>
   api.get("/challenges/submissions");
