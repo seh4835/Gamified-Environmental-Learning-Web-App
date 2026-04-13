@@ -45,8 +45,8 @@ def create_app():
     # Initialize Extensions
     CORS(app, 
          resources={r"/api/*": {
-             #"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5000"],
-                "origins": "*",  # Allow all origins for development; restrict in production
+             "origins": ["https://gamified-environmental-learning-web.vercel.app"],
+             #"origins": "*",  # Allow all origins for development; restrict in production
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "Authorization"],
              "supports_credentials": True
