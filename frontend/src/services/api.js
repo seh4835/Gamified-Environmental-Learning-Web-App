@@ -109,8 +109,15 @@ export const getChallenges = () => api.get("/challenges");
 export const submitChallenge = (formData) =>
   api.post("/challenges/submit", formData);
 
-export const getUserSubmissions = () =>
-  api.get("/challenges/submissions");
+export const getUserSubmissions = () => api.get("/challenges/my-submissions");
+
+export const recordChallengeQuiz = (data) =>
+  api.post("/challenges/record-quiz", data);
+
+export const submitLocalChallenge = (formData) =>
+  api.post("/challenges/submit-local", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
 
 /*
 |--------------------------------------------------------------------------

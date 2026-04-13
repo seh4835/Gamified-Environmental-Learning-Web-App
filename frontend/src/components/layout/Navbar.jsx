@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getUserSubmissions } from "../../services/api";
 import leafIcon from "../../icons/icon_leaf.png";
 import trophyIcon from "../../icons/icon_trophy.png";
 
@@ -22,11 +23,8 @@ export default function Navbar() {
     if (!isStudent) return;
     const fetchSubs = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/challenges/my-submissions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setSubmissions(await res.json());
+        const res = await getUserSubmissions();
+        setSubmissions(res.data);
       } catch { /* silent */ }
     };
     fetchSubs();

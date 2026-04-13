@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getUserSubmissions, recordChallengeQuiz, submitLocalChallenge } from "../services/api";
 import Loader from "../components/ui/Loader";
 import challengeIcon from "../icons/icon_challenge.png";
 import trophyIcon from "../icons/icon_trophy.png";
@@ -101,15 +102,9 @@ export default function Challenges() {
   useEffect(() => {
     const fetchMySubmissions = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/challenges/my-submissions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const names = new Set(data.map(s => s.module).filter(Boolean));
-          setSubmittedModules(names);
-        }
+        const res = await getUserSubmissions();
+        const names = new Set(res.data.map(s => s.module).filter(Boolean));
+        setSubmittedModules(names);
       } catch (err) {
         console.warn("Could not fetch my submissions:", err);
       }
@@ -125,11 +120,10 @@ export default function Challenges() {
     setQuizScore(score);
     setQuizSubmitted(true);
     try {
-      const token = localStorage.getItem("token");
-      await fetch("http://localhost:5000/api/challenges/record-quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ module: activeChallenge.module, score, total: activeChallenge.quiz.length }),
+      await recordChallengeQuiz({
+        module: activeChallenge.module,
+        score,
+        total: activeChallenge.quiz.length
       });
     } catch (err) { console.warn("Could not record quiz attempt:", err); }
   };
@@ -143,19 +137,16 @@ export default function Challenges() {
       formData.append("task", activeChallenge.task);
       formData.append("quiz_score", quizScore !== null ? String(quizScore) : "0");
       formData.append("proof", uploadedFile);
-      const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/challenges/submit-local", {
-        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Submission failed");
+
+      await submitLocalChallenge(formData);
+
       setCompletedModule(activeChallenge.module);
       setSubmittedModules(prev => new Set([...prev, activeChallenge.module]));
       setSubmissionSuccess(true);
       setActiveChallenge(null);
       setAnswers({}); setUploadedFile(null); setQuizSubmitted(false); setQuizScore(null);
     } catch (err) {
-      alert("Submission failed: " + err.message);
+      alert("Submission failed: " + (err.response?.data?.error || err.message));
     } finally { setLoading(false); }
   };
 
