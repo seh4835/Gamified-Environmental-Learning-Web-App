@@ -133,7 +133,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
 
     // redirect
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const updateUser = (updates) => {
