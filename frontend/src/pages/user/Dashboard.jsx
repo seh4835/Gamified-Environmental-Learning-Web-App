@@ -363,7 +363,7 @@ export default function Dashboard() {
         {/* ── QUICK ACTIONS ── */}
         <div className="game-card" style={{ marginBottom: "2rem" }}>
           <h2 className="game-section-title" style={{ fontSize: "1.1rem", marginBottom: "1.25rem" }}>Quick Actions</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem" }}>
             {[
               { to: "/modules", icon: modulesIcon, label: "Learn Modules", sub: "Study & earn XP", color: "var(--neon-blue)" },
               { to: "/challenges", icon: challengeIcon, label: "Eco Challenges", sub: "Act & earn points", color: "var(--neon-purple)" },

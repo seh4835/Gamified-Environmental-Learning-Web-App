@@ -92,10 +92,10 @@ export default function Admin() {
 
         {/* Header */}
         <div className="mb-10 animate-fadeIn">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-100">
             🛠 Admin Dashboard
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-400">
             Review and manage eco-challenge submissions
           </p>
         </div>
@@ -109,7 +109,7 @@ export default function Admin() {
               className={`px-4 py-2 rounded-full text-sm transition ${
                 filter === tab
                   ? "bg-green-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-green-100"
+                  : "bg-[#111] text-gray-300 border border-gray-800 hover:bg-green-900/30"
               }`}
             >
               {tab}
@@ -123,12 +123,12 @@ export default function Admin() {
           {filtered.map((submission) => (
             <div
               key={submission.id}
-              className="bg-white border border-gray-100 rounded-2xl shadow-md p-6 hover:shadow-xl transition transform hover:scale-[1.02]"
+              className="bg-[#111] border border-gray-800 rounded-2xl shadow-md p-6 hover:shadow-xl transition transform hover:scale-[1.02]"
             >
 
               {/* Top */}
               <div className="flex justify-between mb-4">
-                <h2 className="font-semibold text-gray-800">
+                <h2 className="font-semibold text-gray-100">
                   {submission.module}
                 </h2>
 
@@ -142,11 +142,11 @@ export default function Admin() {
               </div>
 
               {/* Info */}
-              <p className="text-sm text-gray-700 mb-2">
+              <p className="text-sm text-gray-300 mb-2">
                 <strong>User:</strong> {submission.user}
               </p>
 
-              <p className="text-sm text-gray-700 mb-2">
+              <p className="text-sm text-gray-300 mb-2">
                 <strong>Task:</strong> {submission.task}
               </p>
 
@@ -192,7 +192,7 @@ export default function Admin() {
               )}
 
               {/* View Proof */}
-              <button className="mt-4 text-sm text-green-600 hover:underline">
+              <button className="mt-4 text-sm text-green-400 hover:underline">
                 View Proof
               </button>
 
@@ -203,7 +203,7 @@ export default function Admin() {
 
         {/* Empty State */}
         {filtered.length === 0 && (
-          <div className="text-center mt-16 text-gray-500">
+          <div className="text-center mt-16 text-gray-400">
             No submissions available.
           </div>
         )}

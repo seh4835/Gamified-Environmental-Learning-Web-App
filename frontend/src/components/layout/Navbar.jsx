@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getUserSubmissions } from "../../services/api";
 import leafIcon from "../../icons/icon_leaf.png";
@@ -7,6 +7,7 @@ import trophyIcon from "../../icons/icon_trophy.png";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [submissions, setSubmissions] = useState([]);
@@ -43,6 +44,11 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    setMobileOpen(false);
+    setStatusOpen(false);
+  }, [location.pathname]);
+
   const pendingCount  = submissions.filter(s => s.status === "pending").length;
   const approvedCount = submissions.filter(s => s.status === "approved" || s.status === "Approved").length;
   const rejectedCount = submissions.filter(s => s.status === "rejected" || s.status === "Rejected").length;
@@ -63,7 +69,7 @@ export default function Navbar() {
       top: 0,
       zIndex: 100,
     }}>
-      <div style={{ maxWidth: 1300, margin: "0 auto", padding: "0 1.5rem" }}>
+      <div style={{ maxWidth: 1300, margin: "0 auto", padding: "0 1rem" }}>
         <div style={{ display: "flex", alignItems: "center", height: 64, gap: 24 }}>
 
           {/* LOGO */}
@@ -102,7 +108,7 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT SIDE */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }} className="hidden-mobile">
             {!user ? (
               <>
                 <NavLink to="/login" className="nav-link">Login</NavLink>
@@ -272,12 +278,87 @@ export default function Navbar() {
               </>
             )}
           </div>
+
+          <button
+            className="mobile-only"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+            style={{
+              marginLeft: "auto",
+              width: 40,
+              height: 40,
+              background: "rgba(0,255,136,0.08)",
+              border: "1px solid rgba(0,255,136,0.25)",
+              borderRadius: 8,
+              color: "var(--neon-green)",
+              fontSize: "1rem",
+              cursor: "pointer",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {mobileOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
 
+      {mobileOpen && (
+        <div
+          className="mobile-only"
+          style={{
+            borderTop: "1px solid rgba(0,255,136,0.12)",
+            background: "#060606",
+            padding: "0.75rem 1rem 1rem",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          <NavLink to="/" className={navLinkClass}>Home</NavLink>
+          {!isAdmin && <NavLink to="/modules" className={navLinkClass}>Modules</NavLink>}
+          {!isAdmin && <NavLink to="/challenges" className={navLinkClass}>Challenges</NavLink>}
+          <NavLink to="/leaderboard" className={navLinkClass}>Leaderboard</NavLink>
+          <a href="/ar/scan.html" target="_blank" rel="noopener noreferrer" className="nav-link">AR Scan</a>
+          {user && !isAdmin && <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>}
+          {user && <NavLink to="/profile" className={navLinkClass}>Profile</NavLink>}
+          {isAdmin && <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>}
+          {isAdmin && <NavLink to="/submissions" className={navLinkClass}>Submissions</NavLink>}
+
+          {!user ? (
+            <>
+              <NavLink to="/login" className={navLinkClass}>Login</NavLink>
+              <Link to="/register" className="btn-primary" style={{ justifyContent: "center", marginTop: 4 }}>
+                Register
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={logout}
+              style={{
+                marginTop: 6,
+                padding: "0.6rem 1rem",
+                background: "transparent",
+                border: "1px solid rgba(248,113,113,0.4)",
+                borderRadius: 6,
+                color: "#f87171",
+                fontFamily: "var(--font-heading)",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      )}
+
       <style>{`
-        @media (max-width: 768px) {
+        .mobile-only { display: none; }
+
+        @media (max-width: 900px) {
           .hidden-mobile { display: none !important; }
+          .mobile-only { display: flex !important; }
         }
       `}</style>
     </nav>

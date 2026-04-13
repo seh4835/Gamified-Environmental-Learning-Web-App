@@ -37,7 +37,7 @@ export default function Login() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "2rem",
+      padding: "1rem",
       backgroundImage: "radial-gradient(ellipse at 30% 20%, rgba(0,255,136,0.05) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(168,85,247,0.05) 0%, transparent 50%)",
     }}>
       <div className="grid-bg" style={{ position: "absolute", inset: 0, opacity: 0.5 }} />
@@ -55,7 +55,7 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div className="game-card" style={{ padding: "2.5rem" }}>
+        <div className="game-card" style={{ padding: "clamp(1rem, 4vw, 2.5rem)" }}>
           <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "1.1rem", color: "#f1f5f9", marginBottom: "0.25rem" }}>Welcome Back</h2>
           <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1.75rem" }}>Sign in to continue your sustainability journey.</p>
 

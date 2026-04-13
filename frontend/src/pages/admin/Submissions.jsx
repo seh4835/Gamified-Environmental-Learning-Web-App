@@ -85,7 +85,7 @@ export default function Submissions() {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
           {Object.entries(counts).map(([k, v]) => (
             <div key={k} className="game-card" style={{ textAlign: "center", padding: "1rem" }}>
               <p style={{ fontFamily: "var(--font-heading)", fontSize: "1.8rem", fontWeight: 900, color: k === "Approved" ? "var(--neon-green)" : k === "Pending" ? "var(--neon-gold)" : k === "Rejected" ? "var(--neon-red)" : "#f1f5f9", lineHeight: 1 }}>{v}</p>

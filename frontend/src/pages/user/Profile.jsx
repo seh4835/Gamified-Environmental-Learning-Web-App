@@ -52,7 +52,7 @@ export default function Profile() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* ── Header ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }} className="animate-fadeIn">
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }} className="animate-fadeIn">
           <div style={{
             width: 52, height: 52,
             background: isTeacher ? "rgba(56,189,248,0.12)" : "rgba(0,255,136,0.12)",
@@ -120,7 +120,7 @@ export default function Profile() {
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
                       className="game-input"
-                      style={{ width: 220 }}
+                      style={{ width: "100%", maxWidth: 220 }}
                       placeholder="Your name"
                     />
                     <input
@@ -128,7 +128,7 @@ export default function Profile() {
                       value={formData.institution}
                       onChange={e => setFormData({ ...formData, institution: e.target.value })}
                       className="game-input"
-                      style={{ width: 220 }}
+                      style={{ width: "100%", maxWidth: 220 }}
                       placeholder="Institution"
                     />
                   </div>
@@ -194,7 +194,7 @@ export default function Profile() {
         {!isTeacher && (
           <>
             {/* Stats Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginBottom: "1.25rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem", marginBottom: "1.25rem" }}>
               <div style={{ background: "#111", border: "1px solid #222", borderRadius: 16, padding: "1.5rem" }}>
                 <p style={{ fontFamily: "var(--font-heading)", fontSize: "0.62rem", color: "#475569", letterSpacing: "0.1em", marginBottom: 8 }}>
                   ECO POINTS

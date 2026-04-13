@@ -88,7 +88,7 @@ export default function Modules() {
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* ── Header ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }} className="animate-fadeIn">
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }} className="animate-fadeIn">
           <img src={modulesIcon} alt="" style={{ width: 52, height: 52, filter: "drop-shadow(0 0 12px rgba(56,189,248,0.7))" }} />
           <div style={{ flex: 1 }}>
             <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.8rem", color: "#f1f5f9" }}>
@@ -163,7 +163,7 @@ export default function Modules() {
             <p style={{ color: "#64748b", fontFamily: "var(--font-heading)" }}>No modules available yet.</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.25rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.25rem" }}>
             {filtered.map((module, index) => {
               const hex   = MODULE_HEX[index % MODULE_HEX.length];
               const txtC  = BUTTON_TEXT[index % BUTTON_TEXT.length];

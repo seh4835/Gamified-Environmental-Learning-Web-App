@@ -8,6 +8,13 @@ export default function Leaderboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -71,7 +78,7 @@ export default function Leaderboard() {
         ) : (
           <>
             {/* ── PODIUM ── */}
-            {users.length >= 3 && (
+            {users.length >= 3 && !isMobile && (
               <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "1rem", marginBottom: "3rem" }}>
                 {[users[1], users[0], users[2]].map((u, i) => {
                   const actualRank = i === 0 ? 1 : i === 1 ? 0 : 2;
@@ -127,7 +134,7 @@ export default function Leaderboard() {
                   const maxPts = users[0]?.eco_points || 1;
                   return (
                     <div key={u.id} style={{
-                      display: "flex", alignItems: "center", gap: "1rem",
+                      display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap",
                       padding: "0.9rem 1.1rem",
                       background: isTop3 ? `linear-gradient(90deg, ${rankColors[i]}08, transparent)` : "var(--bg-dark)",
                       border: `1px solid ${isTop3 ? rankColors[i] + "33" : "var(--bg-border)"}`,

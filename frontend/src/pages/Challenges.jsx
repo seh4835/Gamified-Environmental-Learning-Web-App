@@ -97,6 +97,13 @@ export default function Challenges() {
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [completedModule, setCompletedModule] = useState(null);
   const [submittedModules, setSubmittedModules] = useState(new Set()); // modules already submitted
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // Fetch the user's existing submissions on load
   useEffect(() => {
@@ -184,7 +191,7 @@ export default function Challenges() {
             background: `linear-gradient(135deg, ${hex}12, rgba(17,17,17,0.98))`,
             border: `1px solid ${hex}33`,
             borderRadius: 20, padding: "1.5rem 2rem", marginBottom: "1.5rem",
-            display: "flex", alignItems: "center", gap: "1.25rem",
+            display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap",
             position: "relative", overflow: "hidden",
           }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${hex}, transparent)` }} />
@@ -208,7 +215,7 @@ export default function Challenges() {
             background: "rgba(17,17,17,0.98)", border: "1px solid #222",
             borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem", flexWrap: "wrap" }}>
               <span style={{ fontFamily: "var(--font-heading)", fontSize: "0.6rem", color: "#38bdf8", background: "rgba(56,189,248,0.12)", border: "1px solid rgba(56,189,248,0.25)", padding: "2px 10px", borderRadius: 4, letterSpacing: "0.1em" }}>
                 STEP 1
               </span>
@@ -226,7 +233,7 @@ export default function Challenges() {
                   <p style={{ fontFamily: "var(--font-heading)", fontSize: "0.8rem", color: "#e2e8f0", marginBottom: "0.75rem" }}>
                     <span style={{ color: hex }}>{i + 1}. </span>{q.q}
                   </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.5rem" }}>
                     {q.options.map(opt => {
                       const isCorrect = quizSubmitted && opt === q.correct;
                       const isWrong = quizSubmitted && answers[i] === opt && opt !== q.correct;
@@ -366,7 +373,7 @@ export default function Challenges() {
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }} className="animate-fadeIn">
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }} className="animate-fadeIn">
           <img src={challengeIcon} alt="" style={{ width: 52, height: 52, filter: "drop-shadow(0 0 12px rgba(168,85,247,0.7))" }} />
           <div style={{ flex: 1 }}>
             <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.8rem", color: "#f1f5f9" }}>
@@ -403,7 +410,7 @@ export default function Challenges() {
           <div style={{
             background: "linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,255,136,0.04))",
             border: "1px solid rgba(0,255,136,0.35)", borderRadius: 14,
-            padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem",
+            padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap",
             marginBottom: "1.5rem", boxShadow: "0 0 20px rgba(0,255,136,0.1)",
           }}>
             <img src={trophyIcon} alt="" style={{ width: 38, height: 38 }} />

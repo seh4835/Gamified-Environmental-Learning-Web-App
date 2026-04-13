@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import heroBanner from "../icons/hero_banner.png";
 import leafIcon from "../icons/icon_leaf.png";
@@ -6,6 +7,14 @@ import challengeIcon from "../icons/icon_challenge.png";
 import trophyIcon from "../icons/icon_trophy.png";
 
 export default function Home() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const features = [
     {
       icon: modulesIcon,
@@ -41,7 +50,7 @@ export default function Home() {
     <div style={{ background: "#000" }}>
 
       {/* ── HERO ── */}
-      <section style={{ position: "relative", overflow: "hidden", minHeight: "92vh", display: "flex", alignItems: "center" }}>
+      <section style={{ position: "relative", overflow: "hidden", minHeight: isMobile ? "auto" : "92vh", display: "flex", alignItems: "center" }}>
         {/* Background image */}
         <div style={{
           position: "absolute", inset: 0,
@@ -58,7 +67,7 @@ export default function Home() {
         {/* Grid pattern */}
         <div className="grid-bg" style={{ position: "absolute", inset: 0, opacity: 0.5 }} />
 
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "4rem 2rem", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: isMobile ? "2.5rem 1rem" : "4rem 2rem", width: "100%", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "2rem" : "4rem", alignItems: "center" }}>
 
           {/* LEFT */}
           <div className="animate-fadeIn">
@@ -80,7 +89,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p style={{ fontSize: "1.05rem", color: "#94a3b8", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: 480 }}>
+            <p style={{ fontSize: isMobile ? "0.95rem" : "1.05rem", color: "#94a3b8", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: 480 }}>
               EcoLearn turns environmental education into an epic quest.
               Learn sustainability concepts, complete real-world eco challenges,
               and earn points &amp; badges as you level up.
@@ -103,7 +112,7 @@ export default function Home() {
           {/* RIGHT — floating icon */}
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <div className="animate-float" style={{
-              width: 260, height: 260,
+              width: isMobile ? 180 : 260, height: isMobile ? 180 : 260,
               background: "radial-gradient(circle at 40% 40%, rgba(0,255,136,0.15), transparent 70%)",
               border: "1px solid rgba(0,255,136,0.2)",
               borderRadius: "50%",
@@ -112,7 +121,7 @@ export default function Home() {
               justifyContent: "center",
               boxShadow: "0 0 60px rgba(0,255,136,0.15), inset 0 0 40px rgba(0,255,136,0.05)",
             }}>
-              <img src={leafIcon} alt="EcoLearn" style={{ width: 160, height: 160, objectFit: "contain", filter: "drop-shadow(0 0 20px rgba(0,255,136,0.7))" }} />
+              <img src={leafIcon} alt="EcoLearn" style={{ width: isMobile ? 110 : 160, height: isMobile ? 110 : 160, objectFit: "contain", filter: "drop-shadow(0 0 20px rgba(0,255,136,0.7))" }} />
             </div>
           </div>
         </div>
@@ -124,10 +133,10 @@ export default function Home() {
         borderTop: "1px solid rgba(0,255,136,0.1)",
         borderBottom: "1px solid rgba(0,255,136,0.1)",
       }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "1.5rem 2rem", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "1rem" : "1.5rem 2rem", display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: "1rem" }}>
           {stats.map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>
-              <p style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", fontWeight: 900, color: "var(--neon-green)" }} className="glow-green">
+              <p style={{ fontFamily: "var(--font-heading)", fontSize: isMobile ? "1.45rem" : "2rem", fontWeight: 900, color: "var(--neon-green)" }} className="glow-green">
                 {s.value}
               </p>
               <p style={{ fontSize: "0.78rem", color: "#64748b", fontFamily: "var(--font-heading)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -139,7 +148,7 @@ export default function Home() {
       </div>
 
       {/* ── FEATURES ── */}
-      <section style={{ padding: "6rem 2rem" }}>
+      <section style={{ padding: isMobile ? "3rem 1rem" : "6rem 2rem" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
             <h2 className="game-section-title" style={{ fontSize: "2rem" }}>How It Works</h2>
@@ -147,7 +156,7 @@ export default function Home() {
             <div className="neon-divider" style={{ maxWidth: 200, margin: "0 auto" }} />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: "1.2rem" }}>
             {features.map((f, i) => (
               <div key={f.title} className="game-card" style={{ borderColor: `${f.color}22` }}>
                 <div style={{
@@ -185,12 +194,12 @@ export default function Home() {
       </section>
 
       {/* ── AR SECTION ── */}
-      <section style={{ padding: "5rem 2rem", background: "var(--bg-card)", borderTop: "1px solid var(--bg-border)", borderBottom: "1px solid var(--bg-border)" }}>
+      <section style={{ padding: isMobile ? "3rem 1rem" : "5rem 2rem", background: "var(--bg-card)", borderTop: "1px solid var(--bg-border)", borderBottom: "1px solid var(--bg-border)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <div className="stat-chip chip-blue" style={{ marginBottom: "1.5rem" }}>
             Augmented Reality
           </div>
-          <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
+          <h2 style={{ fontFamily: "var(--font-heading)", fontSize: isMobile ? "1.4rem" : "2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
             Scan Objects. Discover Sustainability.
           </h2>
           <p style={{ color: "#94a3b8", fontSize: "1rem", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: 600, margin: "0 auto 2.5rem" }}>
@@ -203,11 +212,11 @@ export default function Home() {
       </section>
 
       {/* ── CTA ── */}
-      <section style={{ padding: "6rem 2rem", textAlign: "center" }}>
+      <section style={{ padding: isMobile ? "3rem 1rem" : "6rem 2rem", textAlign: "center" }}>
         <div className="grid-bg" style={{ padding: "4rem 2rem", borderRadius: 24, border: "1px solid rgba(0,255,136,0.1)", maxWidth: 800, margin: "0 auto", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,255,136,0.05) 0%, transparent 70%)" }} />
           <div style={{ position: "relative" }}>
-            <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2.2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
+            <h2 style={{ fontFamily: "var(--font-heading)", fontSize: isMobile ? "1.45rem" : "2.2rem", color: "#f1f5f9", marginBottom: "1rem" }}>
               Ready to Make an <span style={{ color: "var(--neon-green)" }} className="glow-green">Impact?</span>
             </h2>
             <p style={{ color: "#64748b", marginBottom: "2rem", fontSize: "1rem" }}>

@@ -20,6 +20,13 @@ export default function ModuleDetail() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [completionData, setCompletionData] = useState(null);
   const [completing, setCompleting] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const fetchModule = async () => {
@@ -187,8 +194,8 @@ export default function ModuleDetail() {
             background: "linear-gradient(135deg, #0a1a0a, #111)",
             border: "1px solid rgba(0,255,136,0.4)",
             borderRadius: 24,
-            padding: "3rem 2.5rem",
-            maxWidth: 420, width: "90%",
+            padding: isMobile ? "2rem 1.25rem" : "3rem 2.5rem",
+            maxWidth: 420, width: "92%",
             textAlign: "center",
             boxShadow: "0 0 60px rgba(0,255,136,0.2)",
             animation: "scaleUp 0.4s ease-out forwards",
@@ -262,7 +269,7 @@ export default function ModuleDetail() {
       <div style={{ maxWidth: 860, margin: "0 auto" }}>
 
         {/* ── PAGE HEADER ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
           <button
             onClick={() => navigate("/modules")}
             style={{
@@ -350,7 +357,7 @@ export default function ModuleDetail() {
           background: "linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(17,17,17,0.98) 40%)",
           border: "1px solid rgba(0,255,136,0.2)",
           borderRadius: 20,
-          padding: "2.5rem",
+          padding: isMobile ? "1.25rem" : "2.5rem",
           marginBottom: "1.5rem",
           minHeight: 260,
           position: "relative",
@@ -407,11 +414,12 @@ export default function ModuleDetail() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: "1rem",
           background: "rgba(17,17,17,0.95)",
           border: "1px solid #222",
           borderRadius: 14,
-          padding: "1rem 1.5rem",
+          padding: isMobile ? "0.85rem 1rem" : "1rem 1.5rem",
           marginBottom: "2rem",
         }}>
           {/* Previous */}
