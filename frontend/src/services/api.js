@@ -7,7 +7,7 @@ import axios from "axios";
 */
 
 const api = axios.create({
-  baseURL: "https://gamified-environmental-learning-web-app.onrender.com",
+  baseURL: "https://gamified-environmental-learning-web-app.onrender.com/api",
   headers: {
     "Content-Type": "application/json"
   }
