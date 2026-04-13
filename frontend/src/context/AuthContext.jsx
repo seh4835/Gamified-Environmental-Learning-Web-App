@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   loginUser,
   registerUser,
@@ -22,6 +23,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   /*
   |--------------------------------------------------------------------------
@@ -67,6 +69,21 @@ export const AuthProvider = ({ children }) => {
 
     initializeAuth();
   }, []);
+
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+      navigate("/login", { replace: true });
+    };
+
+    window.addEventListener("auth:logout", handleAuthLogout);
+
+    return () => {
+      window.removeEventListener("auth:logout", handleAuthLogout);
+    };
+  }, [navigate]);
 
   /*
   |--------------------------------------------------------------------------
@@ -128,12 +145,7 @@ export const AuthProvider = ({ children }) => {
   */
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-
-    // redirect
-    window.location.href = "/";
+    window.dispatchEvent(new Event("auth:logout"));
   };
 
   const updateUser = (updates) => {

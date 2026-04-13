@@ -13,6 +13,10 @@ const api = axios.create({
   }
 });
 
+const triggerLogout = () => {
+  window.dispatchEvent(new Event("auth:logout"));
+};
+
 /*
 |--------------------------------------------------------------------------
 | REQUEST INTERCEPTOR (Attach JWT Token)
@@ -46,8 +50,7 @@ api.interceptors.response.use(
 
       // Unauthorized → logout user
       if (status === 401) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        triggerLogout();
       }
 
       // Optional: handle server errors
